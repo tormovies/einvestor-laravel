@@ -1,11 +1,37 @@
-* text=auto eol=lf
+# Auto detect text files and perform LF normalization
+* text=auto
 
-*.blade.php diff=html
-*.css diff=css
-*.html diff=html
-*.md diff=markdown
-*.php diff=php
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.php text
+*.js text
+*.css text
+*.json text
+*.md text
+*.blade.php text
+*.xml text
+*.yml text
+*.yaml text
+*.txt text
+*.html text
+*.htm text
 
-/.github export-ignore
-CHANGELOG.md export-ignore
-.styleci.yml export-ignore
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.rar binary
+*.exe binary
+*.dll binary
+*.mq4 binary
+*.mq5 binary
+*.so binary
+*.dylib binary
+
+# Force LF for shell scripts
+*.sh text eol=lf
+*.bash text eol=lf

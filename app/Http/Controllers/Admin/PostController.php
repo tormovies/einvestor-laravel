@@ -11,11 +11,6 @@ use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('admin');
-    }
-
     /**
      * Список постов
      */
