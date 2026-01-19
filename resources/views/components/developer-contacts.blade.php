@@ -3,6 +3,9 @@
         <div class="developer-contacts-header">
             <span class="developer-contacts-title">Контакты разработчика</span>
         </div>
+        <div class="developer-contacts-notice">
+            Сайт сейчас находится в разработке, по любым вопросам - пишите по контактам ниже.
+        </div>
         <div class="developer-contacts-links">
             <a href="https://t.me/juriyizyumov" target="_blank" rel="noopener" class="developer-contact-link" title="Telegram">
                 <svg class="developer-contact-icon" viewBox="0 0 24 24" fill="currentColor">
@@ -67,6 +70,17 @@
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.developer-contacts-notice {
+    font-size: 0.85rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    padding: 8px;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    border-left: 3px solid #2563eb;
 }
 
 .developer-contacts-links {
