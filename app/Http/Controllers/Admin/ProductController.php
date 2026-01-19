@@ -359,12 +359,26 @@ class ProductController extends Controller
 
         // Обработка base64 изображений в описании
         if (isset($validated['description']) && !empty($validated['description'])) {
+            $descriptionBefore = $validated['description'];
+            $base64Count = preg_match_all('/data:image\/[^;]+;base64,/', $descriptionBefore, $base64Matches);
+            
             \Log::info('Processing description for base64 images', [
                 'product_id' => $product->id,
-                'description_length' => strlen($validated['description']),
-                'has_data_image' => strpos($validated['description'], 'data:image') !== false,
+                'description_length' => strlen($descriptionBefore),
+                'has_data_image' => strpos($descriptionBefore, 'data:image') !== false,
+                'base64_images_count' => $base64Count,
             ]);
+            
             $validated['description'] = $this->processBase64Images($validated['description'], $product->name ?? 'Product');
+            
+            // Проверяем результат
+            $base64CountAfter = preg_match_all('/data:image\/[^;]+;base64,/', $validated['description'], $base64MatchesAfter);
+            \Log::info('Description processed', [
+                'product_id' => $product->id,
+                'base64_before' => $base64Count,
+                'base64_after' => $base64CountAfter,
+                'description_length_after' => strlen($validated['description']),
+            ]);
         }
 
         // Проверка размера description перед сохранением
@@ -501,26 +515,58 @@ class ProductController extends Controller
      */
     private function processBase64Images(string $html, string $productName = 'Product'): string
     {
-        // Улучшенный паттерн для поиска base64 изображений
-        // Поддерживает одинарные и двойные кавычки, пробелы, различные варианты написания
-        $pattern = '/<img[^>]*\s+src\s*=\s*(["\'])(data:image\/([^;]+);base64,([^"\']+))\1[^>]*>/i';
+        // Универсальный паттерн для поиска base64 изображений
+        // Ищем все варианты: с пробелами, без пробелов, одинарные/двойные кавычки
+        $patterns = [
+            // Паттерн 1: стандартный с кавычками
+            '/<img[^>]*\s+src\s*=\s*(["\'])(data:image\/([^;]+);base64,([^"\']+))\1[^>]*>/i',
+            // Паттерн 2: без пробелов вокруг =
+            '/<img[^>]*src=(["\'])(data:image\/([^;]+);base64,([^"\']+))\1[^>]*>/i',
+            // Паттерн 3: с любыми пробелами
+            '/<img[^>]*src\s*=\s*["\'](data:image\/([^;]+);base64,([^"\']+))["\'][^>]*>/i',
+        ];
         
-        // Также пробуем альтернативный паттерн для случаев, когда кавычки могут быть в другом порядке
-        $pattern2 = '/<img[^>]*src\s*=\s*["\'](data:image\/([^;]+);base64,([^"\']+))["\'][^>]*>/i';
+        $allMatches = [];
+        $usedOffsets = [];
         
-        preg_match_all($pattern, $html, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
-        
-        // Если первый паттерн не нашел, пробуем второй
-        if (empty($matches)) {
-            preg_match_all($pattern2, $html, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+        // Пробуем все паттерны и собираем уникальные совпадения
+        foreach ($patterns as $patternIndex => $pattern) {
+            preg_match_all($pattern, $html, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+            
+            foreach ($matches as $match) {
+                $offset = $match[0][1];
+                // Проверяем, не обработали ли мы уже это изображение
+                $isDuplicate = false;
+                foreach ($usedOffsets as $usedOffset) {
+                    // Если позиции близки (в пределах 10 символов), считаем дубликатом
+                    if (abs($offset - $usedOffset) < 10) {
+                        $isDuplicate = true;
+                        break;
+                    }
+                }
+                
+                if (!$isDuplicate) {
+                    $allMatches[] = [
+                        'match' => $match,
+                        'pattern' => $patternIndex,
+                    ];
+                    $usedOffsets[] = $offset;
+                }
+            }
         }
         
-        if (empty($matches)) {
-            \Log::info('No base64 images found in description', ['html_length' => strlen($html)]);
+        if (empty($allMatches)) {
+            \Log::info('No base64 images found in description', [
+                'html_length' => strlen($html),
+                'has_data_image' => strpos($html, 'data:image') !== false,
+            ]);
             return $html; // Нет base64 изображений
         }
 
-        \Log::info('Found base64 images', ['count' => count($matches)]);
+        \Log::info('Found base64 images', [
+            'count' => count($allMatches),
+            'html_length' => strlen($html),
+        ]);
 
         // Убеждаемся, что папка существует
         Storage::disk('public')->makeDirectory('products/images');
@@ -528,24 +574,44 @@ class ProductController extends Controller
         // Обрабатываем в обратном порядке, чтобы позиции не сдвигались при замене
         $replacements = [];
         
-        foreach ($matches as $index => $match) {
+        foreach ($allMatches as $index => $matchData) {
+            $match = $matchData['match'];
             $fullMatch = $match[0][0]; // Полный тег <img>
             $offset = $match[0][1]; // Позиция в строке
             
-            // Определяем, какой паттерн сработал
-            if (isset($match[4])) {
-                // Первый паттерн (с кавычками в группе 1)
-                $quote = $match[1][0]; // Кавычка (одинарная или двойная)
-                $dataUrl = $match[2][0]; // data:image/...;base64,...
-                $imageType = $match[3][0]; // jpeg, png, gif, webp
-                $base64Data = $match[4][0]; // base64 данные
-            } else {
-                // Второй паттерн (без отдельной группы для кавычек)
-                $dataUrl = $match[1][0]; // data:image/...;base64,...
-                $imageType = $match[2][0]; // jpeg, png, gif, webp
-                $base64Data = $match[3][0]; // base64 данные
+            // Определяем, какой паттерн сработал и извлекаем данные
+            $quote = '"';
+            $imageType = '';
+            $base64Data = '';
+            
+            // Пробуем разные варианты извлечения данных в зависимости от паттерна
+            if (isset($match[4]) && isset($match[4][0])) {
+                // Паттерн с группой для кавычек (паттерны 1 и 2)
+                $quote = $match[1][0] ?? '"';
+                $imageType = $match[3][0] ?? '';
+                $base64Data = $match[4][0] ?? '';
+            } elseif (isset($match[3]) && isset($match[3][0])) {
+                // Паттерн без группы для кавычек (паттерн 3)
+                $imageType = $match[2][0] ?? '';
+                $base64Data = $match[3][0] ?? '';
                 // Определяем кавычку из тега
                 $quote = (strpos($fullMatch, 'src="') !== false) ? '"' : "'";
+            } else {
+                \Log::warning('Could not extract image data from match', [
+                    'index' => $index + 1,
+                    'match_count' => count($match),
+                ]);
+                continue;
+            }
+            
+            // Проверяем, что данные извлечены
+            if (empty($base64Data) || empty($imageType)) {
+                \Log::warning('Empty image data or type', [
+                    'index' => $index + 1,
+                    'has_type' => !empty($imageType),
+                    'has_data' => !empty($base64Data),
+                ]);
+                continue;
             }
 
             \Log::info('Processing base64 image', [
@@ -649,7 +715,22 @@ class ProductController extends Controller
                 $html = substr_replace($html, $replacement['new'], $replacement['offset'], strlen($replacement['old']));
             }
 
-            \Log::info('All base64 images replaced', ['count' => count($replacements)]);
+            \Log::info('All base64 images replaced', [
+                'count' => count($replacements),
+                'final_html_length' => strlen($html),
+            ]);
+            
+            // Проверяем, остались ли еще base64 изображения
+            $remainingBase64 = preg_match_all('/data:image\/[^;]+;base64,/', $html, $remaining);
+            if ($remainingBase64 > 0) {
+                \Log::warning('Some base64 images were not replaced', [
+                    'remaining_count' => $remainingBase64,
+                ]);
+            }
+        } else {
+            \Log::warning('No replacements were made despite finding images', [
+                'matches_found' => count($allMatches),
+            ]);
         }
 
         return $html;
