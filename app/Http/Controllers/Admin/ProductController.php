@@ -218,12 +218,35 @@ class ProductController extends Controller
         $product = Product::with('categories', 'tags', 'featuredImage')->findOrFail($id);
 
         // Логирование входящих данных (временно для отладки)
+        $descriptionInput = $request->input('description', '');
+        $base64CountBeforeValidation = preg_match_all('/data:image\/[^;]+;base64,/', $descriptionInput, $base64MatchesBefore);
+        
         \Log::info('Update request received', [
             'product_id' => $id,
             'has_description' => $request->has('description'),
-            'description_length' => strlen($request->input('description', '')),
+            'description_length' => strlen($descriptionInput),
+            'base64_images_in_request' => $base64CountBeforeValidation,
             'has_image' => $request->hasFile('image'),
         ]);
+
+        // ВАЖНО: Обрабатываем base64 изображения ДО валидации, чтобы уменьшить размер описания
+        // и оно прошло валидацию max:65535
+        if (!empty($descriptionInput) && $base64CountBeforeValidation > 0) {
+            \Log::info('Processing base64 images BEFORE validation', [
+                'base64_count' => $base64CountBeforeValidation,
+                'description_length_before' => strlen($descriptionInput),
+            ]);
+            
+            $descriptionInput = $this->processBase64Images($descriptionInput, $product->name ?? 'Product');
+            
+            // Заменяем описание в запросе на обработанное
+            $request->merge(['description' => $descriptionInput]);
+            
+            \Log::info('Base64 images processed before validation', [
+                'description_length_after' => strlen($descriptionInput),
+                'base64_remaining' => preg_match_all('/data:image\/[^;]+;base64,/', $descriptionInput, $base64MatchesAfter),
+            ]);
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -357,28 +380,16 @@ class ProductController extends Controller
         // НО НЕ удаляем description - оно должно сохраниться!
         unset($validated['categories'], $validated['tags'], $validated['file'], $validated['image']);
 
-        // Обработка base64 изображений в описании
+        // Проверка: если base64 изображения все еще остались (на случай, если обработка до валидации не сработала)
         if (isset($validated['description']) && !empty($validated['description'])) {
-            $descriptionBefore = $validated['description'];
-            $base64Count = preg_match_all('/data:image\/[^;]+;base64,/', $descriptionBefore, $base64Matches);
-            
-            \Log::info('Processing description for base64 images', [
-                'product_id' => $product->id,
-                'description_length' => strlen($descriptionBefore),
-                'has_data_image' => strpos($descriptionBefore, 'data:image') !== false,
-                'base64_images_count' => $base64Count,
-            ]);
-            
-            $validated['description'] = $this->processBase64Images($validated['description'], $product->name ?? 'Product');
-            
-            // Проверяем результат
-            $base64CountAfter = preg_match_all('/data:image\/[^;]+;base64,/', $validated['description'], $base64MatchesAfter);
-            \Log::info('Description processed', [
-                'product_id' => $product->id,
-                'base64_before' => $base64Count,
-                'base64_after' => $base64CountAfter,
-                'description_length_after' => strlen($validated['description']),
-            ]);
+            $base64Count = preg_match_all('/data:image\/[^;]+;base64,/', $validated['description'], $base64Matches);
+            if ($base64Count > 0) {
+                \Log::warning('Base64 images still present after validation, processing now', [
+                    'product_id' => $product->id,
+                    'base64_count' => $base64Count,
+                ]);
+                $validated['description'] = $this->processBase64Images($validated['description'], $product->name ?? 'Product');
+            }
         }
 
         // Проверка размера description перед сохранением
