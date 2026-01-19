@@ -136,6 +136,11 @@ class ProductController extends Controller
             $validated['published_at'] = now();
         }
 
+        // Обработка base64 изображений в описании
+        if (isset($validated['description']) && !empty($validated['description'])) {
+            $validated['description'] = $this->processBase64Images($validated['description'], $validated['name'] ?? 'Product');
+        }
+
         // Сохранение товара
         $categories = $validated['categories'] ?? [];
         $tags = $validated['tags'] ?? [];
@@ -348,6 +353,11 @@ class ProductController extends Controller
         // НО НЕ удаляем description - оно должно сохраниться!
         unset($validated['categories'], $validated['tags'], $validated['file'], $validated['image']);
 
+        // Обработка base64 изображений в описании
+        if (isset($validated['description']) && !empty($validated['description'])) {
+            $validated['description'] = $this->processBase64Images($validated['description'], $product->name ?? 'Product');
+        }
+
         // Проверка размера description перед сохранением
         if (isset($validated['description']) && strlen($validated['description']) > 65535) {
             \Log::warning('Description too long', [
@@ -474,5 +484,100 @@ class ProductController extends Controller
             ],
             'message' => 'Тег успешно создан'
         ]);
+    }
+
+    /**
+     * Обработка base64 изображений в описании
+     * Конвертирует data:image/... в файлы и заменяет в HTML
+     */
+    private function processBase64Images(string $html, string $productName = 'Product'): string
+    {
+        // Паттерн для поиска base64 изображений
+        $pattern = '/<img[^>]+src=["\'](data:image\/([^;]+);base64,([^"\']+))["\'][^>]*>/i';
+        
+        preg_match_all($pattern, $html, $matches, PREG_SET_ORDER);
+        
+        if (empty($matches)) {
+            return $html; // Нет base64 изображений
+        }
+
+        // Убеждаемся, что папка существует
+        Storage::disk('public')->makeDirectory('products/images');
+
+        foreach ($matches as $match) {
+            $fullMatch = $match[0]; // Полный тег <img>
+            $dataUrl = $match[1]; // data:image/...;base64,...
+            $imageType = $match[2]; // jpeg, png, gif, webp
+            $base64Data = $match[3]; // base64 данные
+
+            try {
+                // Декодируем base64
+                $imageData = base64_decode($base64Data);
+                
+                if ($imageData === false) {
+                    \Log::warning('Failed to decode base64 image', ['type' => $imageType]);
+                    continue;
+                }
+
+                // Определяем расширение файла
+                $extension = $imageType === 'jpeg' ? 'jpg' : $imageType;
+                
+                // Генерируем имя файла
+                $filename = time() . '_' . Str::random(10) . '.' . $extension;
+                $path = 'products/images/' . $filename;
+
+                // Сохраняем файл
+                $saved = Storage::disk('public')->put($path, $imageData);
+                
+                if (!$saved) {
+                    \Log::warning('Failed to save base64 image', ['path' => $path]);
+                    continue;
+                }
+
+                // Получаем размеры изображения
+                $imageInfo = @getimagesizefromstring($imageData);
+                $width = $imageInfo[0] ?? null;
+                $height = $imageInfo[1] ?? null;
+
+                // Создаем запись в media
+                $media = Media::create([
+                    'filename' => $filename,
+                    'original_filename' => 'editor-image.' . $extension,
+                    'path' => $path,
+                    'url' => '/storage/' . $path,
+                    'mime_type' => 'image/' . $imageType,
+                    'size' => strlen($imageData),
+                    'width' => $width,
+                    'height' => $height,
+                    'title' => $productName,
+                    'alt' => $productName,
+                ]);
+
+                // Заменяем data:image на локальный путь
+                $localUrl = asset('storage/' . $path);
+                $newImgTag = preg_replace(
+                    '/src=["\']data:image\/[^"\']+["\']/i',
+                    'src="' . $localUrl . '"',
+                    $fullMatch
+                );
+
+                // Заменяем в HTML
+                $html = str_replace($fullMatch, $newImgTag, $html);
+
+                \Log::info('Base64 image converted', [
+                    'media_id' => $media->id,
+                    'path' => $path,
+                ]);
+
+            } catch (\Exception $e) {
+                \Log::error('Error processing base64 image', [
+                    'error' => $e->getMessage(),
+                    'type' => $imageType,
+                ]);
+                continue;
+            }
+        }
+
+        return $html;
     }
 }
