@@ -138,6 +138,10 @@ class ProductController extends Controller
 
         // Обработка base64 изображений в описании
         if (isset($validated['description']) && !empty($validated['description'])) {
+            \Log::info('Processing description for base64 images (create)', [
+                'description_length' => strlen($validated['description']),
+                'has_data_image' => strpos($validated['description'], 'data:image') !== false,
+            ]);
             $validated['description'] = $this->processBase64Images($validated['description'], $validated['name'] ?? 'Product');
         }
 
@@ -355,6 +359,11 @@ class ProductController extends Controller
 
         // Обработка base64 изображений в описании
         if (isset($validated['description']) && !empty($validated['description'])) {
+            \Log::info('Processing description for base64 images', [
+                'product_id' => $product->id,
+                'description_length' => strlen($validated['description']),
+                'has_data_image' => strpos($validated['description'], 'data:image') !== false,
+            ]);
             $validated['description'] = $this->processBase64Images($validated['description'], $product->name ?? 'Product');
         }
 
@@ -492,45 +501,88 @@ class ProductController extends Controller
      */
     private function processBase64Images(string $html, string $productName = 'Product'): string
     {
-        // Паттерн для поиска base64 изображений
-        $pattern = '/<img[^>]+src=["\'](data:image\/([^;]+);base64,([^"\']+))["\'][^>]*>/i';
+        // Улучшенный паттерн для поиска base64 изображений
+        // Поддерживает одинарные и двойные кавычки, пробелы, различные варианты написания
+        $pattern = '/<img[^>]*\s+src\s*=\s*(["\'])(data:image\/([^;]+);base64,([^"\']+))\1[^>]*>/i';
         
-        preg_match_all($pattern, $html, $matches, PREG_SET_ORDER);
+        // Также пробуем альтернативный паттерн для случаев, когда кавычки могут быть в другом порядке
+        $pattern2 = '/<img[^>]*src\s*=\s*["\'](data:image\/([^;]+);base64,([^"\']+))["\'][^>]*>/i';
+        
+        preg_match_all($pattern, $html, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+        
+        // Если первый паттерн не нашел, пробуем второй
+        if (empty($matches)) {
+            preg_match_all($pattern2, $html, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE);
+        }
         
         if (empty($matches)) {
+            \Log::info('No base64 images found in description', ['html_length' => strlen($html)]);
             return $html; // Нет base64 изображений
         }
+
+        \Log::info('Found base64 images', ['count' => count($matches)]);
 
         // Убеждаемся, что папка существует
         Storage::disk('public')->makeDirectory('products/images');
 
-        foreach ($matches as $match) {
-            $fullMatch = $match[0]; // Полный тег <img>
-            $dataUrl = $match[1]; // data:image/...;base64,...
-            $imageType = $match[2]; // jpeg, png, gif, webp
-            $base64Data = $match[3]; // base64 данные
+        // Обрабатываем в обратном порядке, чтобы позиции не сдвигались при замене
+        $replacements = [];
+        
+        foreach ($matches as $index => $match) {
+            $fullMatch = $match[0][0]; // Полный тег <img>
+            $offset = $match[0][1]; // Позиция в строке
+            
+            // Определяем, какой паттерн сработал
+            if (isset($match[4])) {
+                // Первый паттерн (с кавычками в группе 1)
+                $quote = $match[1][0]; // Кавычка (одинарная или двойная)
+                $dataUrl = $match[2][0]; // data:image/...;base64,...
+                $imageType = $match[3][0]; // jpeg, png, gif, webp
+                $base64Data = $match[4][0]; // base64 данные
+            } else {
+                // Второй паттерн (без отдельной группы для кавычек)
+                $dataUrl = $match[1][0]; // data:image/...;base64,...
+                $imageType = $match[2][0]; // jpeg, png, gif, webp
+                $base64Data = $match[3][0]; // base64 данные
+                // Определяем кавычку из тега
+                $quote = (strpos($fullMatch, 'src="') !== false) ? '"' : "'";
+            }
+
+            \Log::info('Processing base64 image', [
+                'index' => $index + 1,
+                'type' => $imageType,
+                'data_length' => strlen($base64Data),
+                'offset' => $offset,
+            ]);
 
             try {
                 // Декодируем base64
-                $imageData = base64_decode($base64Data);
+                $imageData = base64_decode($base64Data, true);
                 
                 if ($imageData === false) {
-                    \Log::warning('Failed to decode base64 image', ['type' => $imageType]);
+                    \Log::warning('Failed to decode base64 image', [
+                        'index' => $index + 1,
+                        'type' => $imageType,
+                        'data_preview' => substr($base64Data, 0, 50) . '...',
+                    ]);
                     continue;
                 }
 
                 // Определяем расширение файла
-                $extension = $imageType === 'jpeg' ? 'jpg' : $imageType;
+                $extension = $imageType === 'jpeg' ? 'jpg' : ($imageType === 'svg+xml' ? 'svg' : $imageType);
                 
-                // Генерируем имя файла
-                $filename = time() . '_' . Str::random(10) . '.' . $extension;
+                // Генерируем уникальное имя файла для каждого изображения
+                $filename = time() . '_' . ($index + 1) . '_' . Str::random(10) . '.' . $extension;
                 $path = 'products/images/' . $filename;
 
                 // Сохраняем файл
                 $saved = Storage::disk('public')->put($path, $imageData);
                 
                 if (!$saved) {
-                    \Log::warning('Failed to save base64 image', ['path' => $path]);
+                    \Log::warning('Failed to save base64 image', [
+                        'index' => $index + 1,
+                        'path' => $path,
+                    ]);
                     continue;
                 }
 
@@ -542,40 +594,62 @@ class ProductController extends Controller
                 // Создаем запись в media
                 $media = Media::create([
                     'filename' => $filename,
-                    'original_filename' => 'editor-image.' . $extension,
+                    'original_filename' => 'editor-image-' . ($index + 1) . '.' . $extension,
                     'path' => $path,
                     'url' => '/storage/' . $path,
                     'mime_type' => 'image/' . $imageType,
                     'size' => strlen($imageData),
                     'width' => $width,
                     'height' => $height,
-                    'title' => $productName,
-                    'alt' => $productName,
+                    'title' => $productName . ' - Image ' . ($index + 1),
+                    'alt' => $productName . ' - Image ' . ($index + 1),
                 ]);
 
                 // Заменяем data:image на локальный путь
                 $localUrl = asset('storage/' . $path);
                 $newImgTag = preg_replace(
-                    '/src=["\']data:image\/[^"\']+["\']/i',
-                    'src="' . $localUrl . '"',
+                    '/src=' . preg_quote($quote, '/') . 'data:image\/[^' . preg_quote($quote, '/') . ']+' . preg_quote($quote, '/') . '/i',
+                    'src=' . $quote . $localUrl . $quote,
                     $fullMatch
                 );
 
-                // Заменяем в HTML
-                $html = str_replace($fullMatch, $newImgTag, $html);
+                // Сохраняем замену для применения в обратном порядке
+                $replacements[] = [
+                    'old' => $fullMatch,
+                    'new' => $newImgTag,
+                    'offset' => $offset,
+                ];
 
-                \Log::info('Base64 image converted', [
+                \Log::info('Base64 image converted successfully', [
+                    'index' => $index + 1,
                     'media_id' => $media->id,
                     'path' => $path,
+                    'url' => $localUrl,
                 ]);
 
             } catch (\Exception $e) {
                 \Log::error('Error processing base64 image', [
+                    'index' => $index + 1,
                     'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
                     'type' => $imageType,
                 ]);
                 continue;
             }
+        }
+
+        // Применяем замены в обратном порядке (с конца строки), чтобы позиции не сдвигались
+        if (!empty($replacements)) {
+            // Сортируем по позиции в обратном порядке
+            usort($replacements, function($a, $b) {
+                return $b['offset'] - $a['offset'];
+            });
+
+            foreach ($replacements as $replacement) {
+                $html = substr_replace($html, $replacement['new'], $replacement['offset'], strlen($replacement['old']));
+            }
+
+            \Log::info('All base64 images replaced', ['count' => count($replacements)]);
         }
 
         return $html;

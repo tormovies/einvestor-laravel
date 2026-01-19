@@ -73,6 +73,12 @@ tail -f storage/logs/laravel.log
 ssh adminfeg@narnia "cd ~/einvestor.ru/laravel && git pull origin main && php8.3 \$(which composer) install --no-dev --optimize-autoloader && php8.3 artisan migrate --force && php8.3 artisan storage:link && php8.3 artisan optimize:clear && php8.3 artisan config:cache && php8.3 artisan route:cache && php8.3 artisan view:cache"
 ```
 
+## Быстрая команда для деплоя (копировать целиком):
+
+```bash
+ssh adminfeg@narnia "cd ~/einvestor.ru/laravel && git pull origin main && php8.3 artisan optimize:clear && php8.3 artisan config:cache && php8.3 artisan route:cache && php8.3 artisan view:cache"
+```
+
 ## После деплоя проверьте:
 
 1. Откройте сайт: `https://einvestor.ru`
