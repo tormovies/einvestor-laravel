@@ -2,11 +2,17 @@
     <div class="developer-contacts-card">
         <div class="developer-contacts-header">
             <span class="developer-contacts-title">Контакты разработчика</span>
+            <button class="developer-contacts-toggle" id="developer-contacts-toggle" aria-label="Свернуть/Развернуть">
+                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
         </div>
-        <div class="developer-contacts-notice">
-            Сайт сейчас находится в разработке, по любым вопросам - пишите по контактам ниже.
-        </div>
-        <div class="developer-contacts-links">
+        <div class="developer-contacts-content" id="developer-contacts-content">
+            <div class="developer-contacts-notice">
+                Сайт сейчас находится в разработке, по любым вопросам - пишите по контактам ниже.
+            </div>
+            <div class="developer-contacts-links">
             <a href="https://t.me/juriyizyumov" target="_blank" rel="noopener" class="developer-contact-link" title="Telegram">
                 <svg class="developer-contact-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.193c.178 1.948.94 6.678.94 6.678s.57 1.82-.416 2.202c-.985.38-2.456-.64-2.708-.7-.252-.06-4.35 2.9-5.45 3.6-.55.35-1.12.52-1.12.52s-1.05.07-1.5-1.05c-.45-1.12-.9-2.25-1.35-3.38-.45-1.13-3.15-9.45-3.15-9.45s-.21-.63.15-1.05c.36-.42 1.05-.42 1.05-.42l12.6 4.8s.84.27.84.9c0 .63-.84.84-.84.84l-5.4 1.8-2.7.9s-.42.15-.42.6c0 .45.42.6.42.6l2.7.9 5.4 1.8s.84.21.84.84c0 .63-.84.9-.84.9l-12.6 4.8s-.69 0-1.05-.42c-.36-.42-.15-1.05-.15-1.05s.9-2.25 1.35-3.38c.45-1.13.9-2.25 1.35-3.38.45-1.12 1.5-1.05 1.5-1.05s.57.07 1.12.52c.55.45 5.45 3.6 5.45 3.6s2.456.7 2.708.7c.252 0 .94-.42.94-.84 0-.42 0-5.25-.94-6.678z"/>
@@ -31,6 +37,7 @@
                 </svg>
                 <span>ВКонтакте</span>
             </a>
+            </div>
         </div>
     </div>
 </div>
@@ -60,9 +67,13 @@
 }
 
 .developer-contacts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 1px solid #e5e7eb;
+    cursor: pointer;
 }
 
 .developer-contacts-title {
@@ -71,6 +82,47 @@
     color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    flex: 1;
+}
+
+.developer-contacts-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    transition: transform 0.3s ease, color 0.2s;
+    margin-left: 8px;
+}
+
+.developer-contacts-toggle:hover {
+    color: #2563eb;
+}
+
+.developer-contacts-toggle .toggle-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+}
+
+.developer-contacts-card.collapsed .developer-contacts-toggle .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.developer-contacts-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 1000px;
+    opacity: 1;
+}
+
+.developer-contacts-card.collapsed .developer-contacts-content {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
 }
 
 .developer-contacts-notice {
@@ -174,3 +226,50 @@
     }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const STORAGE_KEY = 'developer-contacts-collapsed';
+    const card = document.querySelector('.developer-contacts-card');
+    const toggle = document.getElementById('developer-contacts-toggle');
+    const content = document.getElementById('developer-contacts-content');
+    
+    if (!card || !toggle || !content) return;
+    
+    // Проверяем сохраненное состояние
+    const isCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
+    
+    // Применяем сохраненное состояние
+    if (isCollapsed) {
+        card.classList.add('collapsed');
+    }
+    
+    // Обработчик клика на заголовок или кнопку
+    function handleToggle() {
+        const isCurrentlyCollapsed = card.classList.contains('collapsed');
+        
+        if (isCurrentlyCollapsed) {
+            card.classList.remove('collapsed');
+            localStorage.setItem(STORAGE_KEY, 'false');
+        } else {
+            card.classList.add('collapsed');
+            localStorage.setItem(STORAGE_KEY, 'true');
+        }
+    }
+    
+    toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        handleToggle();
+    });
+    
+    // Также можно кликать на заголовок
+    const header = card.querySelector('.developer-contacts-header');
+    if (header) {
+        header.addEventListener('click', function(e) {
+            if (e.target !== toggle && !toggle.contains(e.target)) {
+                handleToggle();
+            }
+        });
+    }
+});
+</script>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\Product;
+use App\Models\Page;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -18,9 +19,12 @@ class HomeController extends Controller
         $featuredProducts = Product::where('status', 'publish')
             ->where('stock_status', 'in_stock')
             ->orderBy('created_at', 'desc')
-            ->limit(6)
+            ->limit(15)
             ->get();
         
-        return view('home', compact('latestPosts', 'featuredProducts'));
+        // Получаем системную страницу для главной
+        $systemPage = Page::where('slug', '_home')->first();
+        
+        return view('home', compact('latestPosts', 'featuredProducts', 'systemPage'));
     }
 }

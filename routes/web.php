@@ -4,7 +4,10 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
+use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CartController;
@@ -86,14 +89,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Посты
     Route::resource('posts', AdminPostController::class);
     
+    // Страницы
+    Route::resource('pages', AdminPageController::class);
+    
+    // Категории
+    Route::resource('categories', AdminCategoryController::class);
+    
+    // Теги
+    Route::resource('tags', AdminTagController::class);
+    
     // Пользователи
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/{id}', [AdminUserController::class, 'show'])->name('users.show');
-    
-    // Теги (AJAX для создания)
-    Route::post('/tags/create', [AdminProductController::class, 'createTag'])->name('tags.create');
 });
 
 // Страницы (должен быть последним, так как перехватывает любые другие пути)
 Route::get('/{slug}', [PageController::class, 'show'])->name('pages.show')
-    ->where('slug', '^(?!articles|products|category|tag|cart|checkout|download|login|logout|account|admin|api).*$'); // Исключаем зарезервированные пути
+    ->where('slug', '^(?!articles|products|category|tag|cart|checkout|download|login|logout|account|admin|api|_home|_products_list|_articles_list).*$'); // Исключаем зарезервированные пути

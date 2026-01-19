@@ -61,6 +61,10 @@ class PostController extends Controller
             'categories.*' => 'exists:categories,id',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
+            'seo_title' => 'nullable|string|max:255',
+            'seo_description' => 'nullable|string|max:320',
+            'seo_h1' => 'nullable|string|max:255',
+            'seo_intro_text' => 'nullable|string',
         ]);
 
         // Генерация slug, если не указан
@@ -140,6 +144,10 @@ class PostController extends Controller
             'categories.*' => 'exists:categories,id',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
+            'seo_title' => 'nullable|string|max:255',
+            'seo_description' => 'nullable|string|max:320',
+            'seo_h1' => 'nullable|string|max:255',
+            'seo_intro_text' => 'nullable|string',
         ]);
 
         // Генерация slug, если не указан

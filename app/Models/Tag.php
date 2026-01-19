@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Tag extends Model
 {
     protected $fillable = [
-        'wp_id', 'slug', 'name', 'description', 'count'
+        'wp_id', 'slug', 'name', 'description', 'count',
+        'seo_title', 'seo_description', 'seo_h1', 'seo_intro_text'
     ];
 
     public function posts(): BelongsToMany

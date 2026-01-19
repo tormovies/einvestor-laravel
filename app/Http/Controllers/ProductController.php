@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Page;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -13,7 +14,10 @@ class ProductController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(12);
         
-        return view('products.index', compact('products'));
+        // Получаем системную страницу для списка товаров
+        $systemPage = Page::where('slug', '_products_list')->first();
+        
+        return view('products.index', compact('products', 'systemPage'));
     }
 
     public function show(string $slug)

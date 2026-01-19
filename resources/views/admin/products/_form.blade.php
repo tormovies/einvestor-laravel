@@ -518,6 +518,43 @@
             <div id="tags-hidden-inputs"></div>
             @error('tags') <span class="error">{{ $message }}</span> @enderror
         </div>
+        
+        <!-- SEO настройки -->
+        <div class="form-group full-width" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e5e7eb;">
+            <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: #374151;">SEO настройки</h2>
+        </div>
+        
+        <!-- SEO Title -->
+        <div class="form-group full-width">
+            <label for="seo_title">SEO Title (Meta Title)</label>
+            <input type="text" name="seo_title" id="seo_title" value="{{ old('seo_title', $product->seo_title ?? '') }}" maxlength="255">
+            <span class="help-text">Заголовок страницы для поисковых систем (рекомендуется 50-60 символов). Если не указан, будет использовано название товара.</span>
+            @error('seo_title') <span class="error">{{ $message }}</span> @enderror
+        </div>
+        
+        <!-- SEO Description -->
+        <div class="form-group full-width">
+            <label for="seo_description">SEO Description (Meta Description)</label>
+            <textarea name="seo_description" id="seo_description" rows="3" maxlength="320">{{ old('seo_description', $product->seo_description ?? '') }}</textarea>
+            <span class="help-text">Описание страницы для поисковых систем (рекомендуется 150-160 символов). Если не указано, будет использовано краткое описание.</span>
+            @error('seo_description') <span class="error">{{ $message }}</span> @enderror
+        </div>
+        
+        <!-- SEO H1 -->
+        <div class="form-group full-width">
+            <label for="seo_h1">H1 Заголовок</label>
+            <input type="text" name="seo_h1" id="seo_h1" value="{{ old('seo_h1', $product->seo_h1 ?? '') }}" maxlength="255">
+            <span class="help-text">Основной заголовок страницы (H1). Если не указан, будет использовано название товара.</span>
+            @error('seo_h1') <span class="error">{{ $message }}</span> @enderror
+        </div>
+        
+        <!-- SEO Intro Text -->
+        <div class="form-group full-width">
+            <label for="seo_intro_text">Текст под H1</label>
+            <textarea name="seo_intro_text" id="seo_intro_text" rows="3">{{ old('seo_intro_text', $product->seo_intro_text ?? '') }}</textarea>
+            <span class="help-text">Вводный текст, который будет отображаться сразу под основным заголовком H1.</span>
+            @error('seo_intro_text') <span class="error">{{ $message }}</span> @enderror
+        </div>
     </div>
     
     <!-- Кнопки действий -->

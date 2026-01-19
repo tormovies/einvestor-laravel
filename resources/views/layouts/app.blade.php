@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'EInvestor - Магазин скриптов и индикаторов')</title>
+    @hasSection('seo')
+        @yield('seo')
+    @else
+        <title>@yield('title', 'EInvestor - Магазин скриптов и индикаторов')</title>
+        <meta name="description" content="Магазин скриптов и индикаторов для торговли">
+    @endif
     
     <style>
         * {
@@ -40,9 +45,57 @@
         }
         
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            text-decoration: none;
             font-size: 1.5rem;
-            font-weight: bold;
-            color: #2563eb;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: translateY(-2px);
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+        }
+        
+        .logo-text {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 1.25rem;
+            }
+            
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 1.1rem;
+            }
+            
+            .logo-icon {
+                width: 36px;
+                height: 36px;
+            }
         }
         
         .nav-links {
@@ -186,7 +239,23 @@
     <header>
         <div class="container">
             <nav>
-                <a href="{{ route('home') }}" class="logo">EInvestor</a>
+                <a href="{{ route('home') }}" class="logo">
+                    <svg class="logo-icon" viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <!-- График роста (увеличен) -->
+                        <path d="M5 32 L12 24 L20 26 L28 14 L36 18 L44 10" stroke="url(#logoGradient)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <circle cx="5" cy="32" r="3.5" fill="url(#logoGradient)"/>
+                        <circle cx="44" cy="10" r="3.5" fill="url(#logoGradient)"/>
+                        <!-- Буква E (увеличенная и жирная) -->
+                        <path d="M52 8 L52 32 M52 8 L70 8 M52 20 L66 20 M52 32 L70 32" stroke="url(#logoGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="logo-text">Investor</span>
+                </a>
                 <ul class="nav-links">
                     <li><a href="{{ route('home') }}">Главная</a></li>
                     <li><a href="{{ route('articles.index') }}">Статьи</a></li>

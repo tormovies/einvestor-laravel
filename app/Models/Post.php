@@ -14,7 +14,8 @@ class Post extends Model
 
     protected $fillable = [
         'wp_id', 'slug', 'title', 'content', 'excerpt',
-        'status', 'author_id', 'featured_image_id', 'published_at'
+        'status', 'author_id', 'featured_image_id', 'published_at',
+        'seo_title', 'seo_description', 'seo_h1', 'seo_intro_text'
     ];
 
     protected $casts = [

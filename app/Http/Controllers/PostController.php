@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Page;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -13,7 +14,10 @@ class PostController extends Controller
             ->orderBy('published_at', 'desc')
             ->paginate(10);
         
-        return view('posts.index', compact('posts'));
+        // Получаем системную страницу для списка статей
+        $systemPage = Page::where('slug', '_articles_list')->first();
+        
+        return view('posts.index', compact('posts', 'systemPage'));
     }
 
     public function show(string $slug)

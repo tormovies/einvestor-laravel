@@ -44,6 +44,16 @@ class RedirectMiddleware
             $redirect = Redirect::findRedirect($path);
             
             if ($redirect) {
+                // Нормализуем URL для сравнения (убираем начальный слеш)
+                $normalizedOldUrl = trim($redirect->old_url, '/');
+                $normalizedNewUrl = trim($redirect->new_url, '/');
+                
+                // Если старый и новый URL одинаковые, пропускаем редирект
+                // (это может быть редирект на самого себя, что вызывает цикл)
+                if ($normalizedOldUrl === $normalizedNewUrl) {
+                    return $next($request);
+                }
+                
                 $redirect->increment('hits');
                 return redirect($redirect->new_url, $redirect->status_code);
             }

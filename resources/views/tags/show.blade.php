@@ -1,12 +1,30 @@
 @extends('layouts.app')
 
-@section('title', $tag->name . ' - Тег - EInvestor')
+@php
+    $seoTitle = $tag->seo_title ?? $tag->name . ' - Тег - EInvestor';
+    $seoDescription = $tag->seo_description ?? $tag->description ?? Str::limit('Материалы с тегом ' . $tag->name, 160);
+    $seoH1 = $tag->seo_h1 ?? 'Тег: ' . $tag->name;
+@endphp
+
+@section('seo')
+    <x-seo-meta 
+        :title="$seoTitle"
+        :description="$seoDescription"
+        :url="route('tag.show', $tag->slug)"
+        type="website" />
+@endsection
+
+@section('title', $seoTitle)
 
 @section('content')
 <div class="content">
-    <h1>Тег: {{ $tag->name }}</h1>
+    <h1>{{ $seoH1 }}</h1>
     
-    @if($tag->description)
+    @if($tag->seo_intro_text)
+    <div style="margin-top: 1rem; margin-bottom: 2rem; padding: 1rem; background: #f9fafb; border-radius: 8px; border-left: 3px solid #2563eb; font-size: 1.1rem; line-height: 1.6; color: #4b5563;">
+        {{ $tag->seo_intro_text }}
+    </div>
+    @elseif($tag->description)
     <p style="margin-top: 1rem; color: #6b7280;">{{ $tag->description }}</p>
     @endif
     

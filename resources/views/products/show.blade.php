@@ -1,11 +1,33 @@
 @extends('layouts.app')
 
-@section('title', $product->name . ' - EInvestor')
+@php
+    $seoTitle = $product->seo_title ?? $product->name . ' - EInvestor';
+    $seoDescription = $product->seo_description ?? $product->short_description ?? Str::limit(strip_tags($product->description), 160);
+    $seoImage = $product->featuredImage ? $product->featuredImage->image_url : asset('images/og-default.jpg');
+    $seoH1 = $product->seo_h1 ?? $product->name;
+@endphp
+
+@section('seo')
+    <x-seo-meta 
+        :title="$seoTitle"
+        :description="$seoDescription"
+        :image="$seoImage"
+        :url="route('products.show', $product->slug)"
+        type="product" />
+@endsection
+
+@section('title', $seoTitle)
 
 @section('content')
 <div class="content">
     <article>
-        <h1>{{ $product->name }}</h1>
+        <h1>{{ $seoH1 }}</h1>
+        
+        @if($product->seo_intro_text)
+        <div style="margin-top: 1rem; margin-bottom: 2rem; padding: 1rem; background: #f9fafb; border-radius: 8px; border-left: 3px solid #2563eb; font-size: 1.1rem; line-height: 1.6; color: #4b5563;">
+            {{ $product->seo_intro_text }}
+        </div>
+        @endif
         
         <div style="display: flex; gap: 2rem; margin-top: 2rem;">
             <div style="flex: 1;">
