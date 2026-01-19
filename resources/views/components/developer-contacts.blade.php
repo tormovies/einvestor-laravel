@@ -50,6 +50,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     padding: 16px;
     min-width: 200px;
+    max-width: 300px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -81,6 +82,8 @@
     background-color: #f9fafb;
     border-radius: 6px;
     border-left: 3px solid #2563eb;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .developer-contacts-links {
