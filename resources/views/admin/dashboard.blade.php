@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="content">
+    @include('admin.partials.navigation')
     <h1>Админ-панель</h1>
     
     @if(session('success'))
@@ -12,47 +13,47 @@
     </div>
     @endif
     
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-        <div class="card">
-            <h3 style="margin-bottom: 0.5rem;">Всего заказов</h3>
-            <div style="font-size: 2rem; font-weight: bold; color: #2563eb; margin: 1rem 0;">
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.5rem; margin-top: 2rem;">
+        <div class="card" style="padding: 1rem;">
+            <h3 style="margin: 0 0 0.25rem 0; font-size: 0.875rem; font-weight: 500;">Всего заказов</h3>
+            <div style="font-size: 1.75rem; font-weight: bold; color: #2563eb; margin: 0;">
                 {{ $stats['orders_total'] }}
             </div>
         </div>
         
-        <div class="card">
-            <h3 style="margin-bottom: 0.5rem;">Ожидают обработки</h3>
-            <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; margin: 1rem 0;">
+        <div class="card" style="padding: 1rem;">
+            <h3 style="margin: 0 0 0.25rem 0; font-size: 0.875rem; font-weight: 500;">Ожидают обработки</h3>
+            <div style="font-size: 1.75rem; font-weight: bold; color: #f59e0b; margin: 0;">
                 {{ $stats['orders_pending'] }}
             </div>
         </div>
         
-        <div class="card">
-            <h3 style="margin-bottom: 0.5rem;">Оплачено</h3>
-            <div style="font-size: 2rem; font-weight: bold; color: #16a34a; margin: 1rem 0;">
+        <div class="card" style="padding: 1rem;">
+            <h3 style="margin: 0 0 0.25rem 0; font-size: 0.875rem; font-weight: 500;">Оплачено</h3>
+            <div style="font-size: 1.75rem; font-weight: bold; color: #16a34a; margin: 0;">
                 {{ $stats['orders_paid'] }}
             </div>
         </div>
         
-        <div class="card">
-            <h3 style="margin-bottom: 0.5rem;">Товаров</h3>
-            <div style="font-size: 2rem; font-weight: bold; color: #2563eb; margin: 1rem 0;">
+        <div class="card" style="padding: 1rem;">
+            <h3 style="margin: 0 0 0.25rem 0; font-size: 0.875rem; font-weight: 500;">Товаров</h3>
+            <div style="font-size: 1.75rem; font-weight: bold; color: #2563eb; margin: 0;">
                 {{ $stats['products_total'] }} / {{ $stats['products_published'] }}
             </div>
-            <div style="color: #6b7280; font-size: 0.875rem;">Всего / Опубликовано</div>
+            <div style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem;">Всего / Опубликовано</div>
         </div>
         
-        <div class="card">
-            <h3 style="margin-bottom: 0.5rem;">Постов</h3>
-            <div style="font-size: 2rem; font-weight: bold; color: #2563eb; margin: 1rem 0;">
+        <div class="card" style="padding: 1rem;">
+            <h3 style="margin: 0 0 0.25rem 0; font-size: 0.875rem; font-weight: 500;">Постов</h3>
+            <div style="font-size: 1.75rem; font-weight: bold; color: #2563eb; margin: 0;">
                 {{ $stats['posts_total'] }} / {{ $stats['posts_published'] }}
             </div>
-            <div style="color: #6b7280; font-size: 0.875rem;">Всего / Опубликовано</div>
+            <div style="color: #6b7280; font-size: 0.75rem; margin-top: 0.25rem;">Всего / Опубликовано</div>
         </div>
         
-        <div class="card">
-            <h3 style="margin-bottom: 0.5rem;">Выручка за месяц</h3>
-            <div style="font-size: 2rem; font-weight: bold; color: #16a34a; margin: 1rem 0;">
+        <div class="card" style="padding: 1rem;">
+            <h3 style="margin: 0 0 0.25rem 0; font-size: 0.875rem; font-weight: 500;">Выручка за месяц</h3>
+            <div style="font-size: 1.75rem; font-weight: bold; color: #16a34a; margin: 0;">
                 {{ number_format($monthlyRevenue, 0, ',', ' ') }} ₽
             </div>
         </div>
@@ -90,15 +91,6 @@
         @else
         <p style="color: #6b7280; margin-top: 1rem;">Заказов пока нет</p>
         @endif
-    </div>
-    
-    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e5e7eb;">
-        <h2>Быстрые действия</h2>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
-            <a href="{{ route('admin.orders.index') }}" class="btn">Управление заказами</a>
-            <a href="{{ route('admin.products.index') }}" class="btn" style="background: #16a34a;">Управление товарами</a>
-            <a href="{{ route('admin.posts.index') }}" class="btn" style="background: #6b7280;">Управление постами</a>
-        </div>
     </div>
 </div>
 @endsection

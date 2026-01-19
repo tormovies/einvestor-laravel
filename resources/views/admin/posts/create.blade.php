@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="content">
+    @include('admin.partials.navigation')
     <h1>Создать пост</h1>
     
     <form action="{{ route('admin.posts.store') }}" method="POST" style="max-width: 800px; margin-top: 2rem;">

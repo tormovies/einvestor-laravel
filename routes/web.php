@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -84,6 +85,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     // Посты
     Route::resource('posts', AdminPostController::class);
+    
+    // Пользователи
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{id}', [AdminUserController::class, 'show'])->name('users.show');
+    
+    // Теги (AJAX для создания)
+    Route::post('/tags/create', [AdminProductController::class, 'createTag'])->name('tags.create');
 });
 
 // Страницы (должен быть последним, так как перехватывает любые другие пути)

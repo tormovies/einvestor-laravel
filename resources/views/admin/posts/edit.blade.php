@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="content">
+    @include('admin.partials.navigation')
     <h1>Редактировать пост: {{ $post->title }}</h1>
     
     <form action="{{ route('admin.posts.update', $post->id) }}" method="POST" style="max-width: 800px; margin-top: 2rem;">

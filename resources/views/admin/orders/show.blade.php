@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="content">
+    @include('admin.partials.navigation')
     <h1>Заказ #{{ $order->number }}</h1>
     
     @if(session('success'))

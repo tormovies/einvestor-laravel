@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="content">
+    @include('admin.partials.navigation')
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1>Управление товарами</h1>
         <a href="{{ route('admin.products.create') }}" class="btn">+ Создать товар</a>
@@ -35,45 +36,63 @@
     <table style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr style="border-bottom: 2px solid #e5e7eb; background: #f9fafb;">
-                <th style="text-align: left; padding: 1rem;">Название</th>
-                <th style="text-align: left; padding: 1rem;">SKU</th>
-                <th style="text-align: right; padding: 1rem;">Цена</th>
-                <th style="text-align: center; padding: 1rem;">Статус</th>
-                <th style="text-align: center; padding: 1rem;">Наличие</th>
-                <th style="text-align: left; padding: 1rem;">Дата</th>
-                <th style="text-align: center; padding: 1rem;">Действия</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Название</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">SKU</th>
+                <th style="text-align: right; padding: 0.5rem; font-size: 0.875rem;">Цена</th>
+                <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Файл</th>
+                <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Статус</th>
+                <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Наличие</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Дата</th>
+                <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Действия</th>
             </tr>
         </thead>
         <tbody>
             @foreach($products as $product)
             <tr style="border-bottom: 1px solid #e5e7eb;">
-                <td style="padding: 1rem;">
-                    <strong>{{ $product->name }}</strong>
+                <td style="padding: 0.5rem; font-size: 0.875rem; font-weight: 500;">
+                    <a href="{{ route('products.show', $product->slug) }}" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       style="color: #2563eb; text-decoration: none; font-weight: 500;">
+                        {{ $product->name }}
+                    </a>
+                </td>
+                <td style="padding: 0.5rem; font-size: 0.875rem;">{{ $product->sku ?: '-' }}</td>
+                <td style="padding: 0.5rem; text-align: right; font-size: 0.875rem;">{{ number_format($product->price, 0, ',', ' ') }} ₽</td>
+                <td style="padding: 0.5rem; text-align: center;">
                     @if($product->file_path)
-                    <span style="font-size: 0.75rem; color: #16a34a; margin-left: 0.5rem;">📦</span>
+                    <span style="font-size: 1.25rem;" title="Есть файл для скачивания">📦</span>
+                    @else
+                    <span style="color: #9ca3af;" title="Нет файла">-</span>
                     @endif
                 </td>
-                <td style="padding: 1rem;">{{ $product->sku ?: '-' }}</td>
-                <td style="padding: 1rem; text-align: right;">{{ number_format($product->price, 0, ',', ' ') }} ₽</td>
-                <td style="padding: 1rem; text-align: center;">
-                    <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; 
-                        background: {{ $product->status === 'publish' ? '#d1fae5' : '#fee2e2' }};
-                        color: {{ $product->status === 'publish' ? '#065f46' : '#991b1b' }};">
-                        {{ $product->status === 'publish' ? 'Опубликовано' : 'Черновик' }}
-                    </span>
+                <td style="padding: 0.5rem; text-align: center;">
+                    @if($product->status === 'publish')
+                    <span style="font-size: 1.25rem;" title="Опубликовано">✅</span>
+                    @else
+                    <span style="font-size: 1.25rem;" title="Черновик">❌</span>
+                    @endif
                 </td>
-                <td style="padding: 1rem; text-align: center;">
-                    {{ $product->stock_status === 'in_stock' ? 'В наличии' : 'Нет в наличии' }}
+                <td style="padding: 0.5rem; text-align: center;">
+                    @if($product->stock_status === 'in_stock')
+                    <span title="В наличии">✓</span>
+                    @else
+                    <span style="color: #dc2626;" title="Нет в наличии">✗</span>
+                    @endif
                 </td>
-                <td style="padding: 1rem;">{{ $product->created_at->format('d.m.Y') }}</td>
-                <td style="padding: 1rem; text-align: center;">
+                <td style="padding: 0.5rem; font-size: 0.875rem;">{{ $product->created_at->format('d.m.Y') }}</td>
+                <td style="padding: 0.5rem; text-align: center;">
                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                        <a href="{{ route('admin.products.edit', $product->id) }}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Редактировать</a>
+                        <a href="{{ route('admin.products.edit', $product->id) }}" 
+                           style="padding: 0.5rem; text-decoration: none; color: #2563eb; font-size: 1.25rem;" 
+                           title="Редактировать">✏️</a>
                         <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" style="display: inline;" 
                               onsubmit="return confirm('Вы уверены, что хотите удалить этот товар?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #dc2626;">Удалить</button>
+                            <button type="submit" 
+                                    style="padding: 0.5rem; background: none; border: none; cursor: pointer; font-size: 1.25rem; color: #dc2626;" 
+                                    title="Удалить">🗑️</button>
                         </form>
                     </div>
                 </td>

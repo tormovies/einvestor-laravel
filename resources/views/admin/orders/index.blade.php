@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="content">
+    @include('admin.partials.navigation')
     <h1>Управление заказами</h1>
     
     <div style="margin-top: 2rem;">

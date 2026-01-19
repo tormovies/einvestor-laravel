@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="content">
+    @include('admin.partials.navigation')
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1>Управление постами</h1>
         <a href="{{ route('admin.posts.create') }}" class="btn">+ Создать пост</a>
@@ -35,56 +36,60 @@
     <table style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr style="border-bottom: 2px solid #e5e7eb; background: #f9fafb;">
-                <th style="text-align: left; padding: 1rem;">Название</th>
-                <th style="text-align: center; padding: 1rem;">Статус</th>
-                <th style="text-align: left; padding: 1rem;">Категории</th>
-                <th style="text-align: left; padding: 1rem;">Дата</th>
-                <th style="text-align: center; padding: 1rem;">Действия</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Название</th>
+                <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Статус</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Категории</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Дата</th>
+                <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Действия</th>
             </tr>
         </thead>
         <tbody>
             @foreach($posts as $post)
             <tr style="border-bottom: 1px solid #e5e7eb;">
-                <td style="padding: 1rem;">
-                    <strong>{{ $post->title }}</strong>
+                <td style="padding: 0.5rem;">
+                    <div style="font-size: 0.875rem; font-weight: 500;">{{ $post->title }}</div>
                     @if($post->excerpt)
-                    <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">
-                        {{ Str::limit(strip_tags($post->excerpt), 60) }}
+                    <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.125rem;">
+                        {{ Str::limit(strip_tags($post->excerpt), 50) }}
                     </div>
                     @endif
                 </td>
-                <td style="padding: 1rem; text-align: center;">
-                    <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; 
-                        background: {{ $post->status === 'publish' ? '#d1fae5' : '#fee2e2' }};
-                        color: {{ $post->status === 'publish' ? '#065f46' : '#991b1b' }};">
-                        {{ $post->status === 'publish' ? 'Опубликовано' : 'Черновик' }}
-                    </span>
+                <td style="padding: 0.5rem; text-align: center;">
+                    @if($post->status === 'publish')
+                    <span style="font-size: 1.25rem;" title="Опубликовано">✅</span>
+                    @else
+                    <span style="font-size: 1.25rem;" title="Черновик">❌</span>
+                    @endif
                 </td>
-                <td style="padding: 1rem;">
+                <td style="padding: 0.5rem;">
                     @if($post->categories->count() > 0)
                     <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
-                        @foreach($post->categories->take(3) as $category)
-                        <span style="font-size: 0.75rem; background: #e5e7eb; padding: 0.25rem 0.5rem; border-radius: 4px;">
+                        @foreach($post->categories->take(2) as $category)
+                        <span style="font-size: 0.7rem; background: #e5e7eb; padding: 0.2rem 0.4rem; border-radius: 3px;">
                             {{ $category->name }}
                         </span>
                         @endforeach
-                        @if($post->categories->count() > 3)
-                        <span style="font-size: 0.75rem; color: #6b7280;">+{{ $post->categories->count() - 3 }}</span>
+                        @if($post->categories->count() > 2)
+                        <span style="font-size: 0.7rem; color: #6b7280;">+{{ $post->categories->count() - 2 }}</span>
                         @endif
                     </div>
                     @else
-                    <span style="color: #9ca3af;">-</span>
+                    <span style="color: #9ca3af; font-size: 0.75rem;">-</span>
                     @endif
                 </td>
-                <td style="padding: 1rem;">{{ $post->created_at->format('d.m.Y H:i') }}</td>
-                <td style="padding: 1rem; text-align: center;">
+                <td style="padding: 0.5rem; font-size: 0.875rem;">{{ $post->created_at->format('d.m.Y') }}</td>
+                <td style="padding: 0.5rem; text-align: center;">
                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                        <a href="{{ route('admin.posts.edit', $post->id) }}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Редактировать</a>
+                        <a href="{{ route('admin.posts.edit', $post->id) }}" 
+                           style="padding: 0.5rem; text-decoration: none; color: #2563eb; font-size: 1.25rem;" 
+                           title="Редактировать">✏️</a>
                         <form action="{{ route('admin.posts.destroy', $post->id) }}" method="POST" style="display: inline;" 
                               onsubmit="return confirm('Вы уверены, что хотите удалить этот пост?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #dc2626;">Удалить</button>
+                            <button type="submit" 
+                                    style="padding: 0.5rem; background: none; border: none; cursor: pointer; font-size: 1.25rem; color: #dc2626;" 
+                                    title="Удалить">🗑️</button>
                         </form>
                     </div>
                 </td>
