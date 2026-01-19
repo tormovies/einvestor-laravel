@@ -179,6 +179,10 @@
     @stack('styles')
 </head>
 <body>
+    @if(!request()->is('admin*'))
+        @include('components.developer-contacts')
+    @endif
+    
     <header>
         <div class="container">
             <nav>
