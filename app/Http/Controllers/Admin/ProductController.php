@@ -59,7 +59,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products,slug',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:65535', // TEXT field max size
             'short_description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'sku' => 'nullable|string|max:100|unique:products,sku',
@@ -141,7 +141,16 @@ class ProductController extends Controller
         $tags = $validated['tags'] ?? [];
         unset($validated['categories'], $validated['tags'], $validated['file'], $validated['image']);
 
-        $product = Product::create($validated);
+        try {
+            $product = Product::create($validated);
+        } catch (\Exception $e) {
+            \Log::error('Error creating product', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            return back()->withErrors(['error' => 'Ошибка при создании товара: ' . $e->getMessage()])->withInput();
+        }
         
         // Перезагружаем связи для корректного отображения
         $product->refresh();
@@ -210,7 +219,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products,slug,' . $id,
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:65535', // TEXT field max size
             'short_description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'sku' => 'nullable|string|max:100|unique:products,sku,' . $id,
@@ -339,6 +348,16 @@ class ProductController extends Controller
         // НО НЕ удаляем description - оно должно сохраниться!
         unset($validated['categories'], $validated['tags'], $validated['file'], $validated['image']);
 
+        // Проверка размера description перед сохранением
+        if (isset($validated['description']) && strlen($validated['description']) > 65535) {
+            \Log::warning('Description too long', [
+                'product_id' => $product->id,
+                'description_length' => strlen($validated['description']),
+            ]);
+            // Обрезаем до максимального размера
+            $validated['description'] = mb_substr($validated['description'], 0, 65535);
+        }
+
         // Логирование для отладки (временно)
         \Log::info('Updating product', [
             'product_id' => $product->id,
@@ -350,7 +369,17 @@ class ProductController extends Controller
 
         // Обновляем товар (featured_image_id должен быть в validated, если изображение загружено)
         // description также должно быть в validated
-        $updated = $product->update($validated);
+        try {
+            $updated = $product->update($validated);
+        } catch (\Exception $e) {
+            \Log::error('Error updating product', [
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            return back()->withErrors(['error' => 'Ошибка при сохранении товара: ' . $e->getMessage()])->withInput();
+        }
         
         \Log::info('Product update result', [
             'updated' => $updated,
