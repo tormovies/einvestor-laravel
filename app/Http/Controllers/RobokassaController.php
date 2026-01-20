@@ -82,19 +82,13 @@ class RobokassaController extends Controller
         
         Log::info('Robokassa success URL called', $debugInfo);
         
+        // ВО ВРЕМЯ ОТЛАДКИ: если нет InvId, показываем отладочную информацию
         $invId = $request->input('InvId');
         
         if (!$invId) {
             Log::warning('Robokassa success: InvId not provided', $debugInfo);
-            // В режиме отладки показываем информацию
-            if (config('app.debug')) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'InvId не предоставлен',
-                    'debug' => $debugInfo
-                ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
-            }
-            return redirect()->route('home');
+            // Показываем отладочную информацию вместо редиректа
+            return response()->view('debug.robokassa', ['debug' => $debugInfo], 200);
         }
 
         $order = Order::find($invId);

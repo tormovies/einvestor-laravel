@@ -19,6 +19,34 @@ class VerifyCsrfToken extends Middleware
     ];
 
     /**
+     * Determine if the request has a URI that should pass through CSRF verification.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    protected function shouldPassThrough($request)
+    {
+        // Проверяем путь разными способами для надежности
+        $path = $request->path();
+        $pathInfo = trim($request->getPathInfo(), '/');
+        
+        // Явно пропускаем все запросы к Робокассе без проверки CSRF
+        if (str_starts_with($path, 'robokassa/') || 
+            str_starts_with($pathInfo, 'robokassa/') || 
+            $request->is('robokassa/*')) {
+            \Illuminate\Support\Facades\Log::info('VerifyCsrfToken: shouldPassThrough - Пропуск CSRF для Робокассы', [
+                'path' => $path,
+                'pathInfo' => $pathInfo,
+                'method' => $request->method(),
+            ]);
+            return true;
+        }
+        
+        // Вызываем родительский метод для проверки массива $except
+        return parent::shouldPassThrough($request);
+    }
+
+    /**
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -37,9 +65,10 @@ class VerifyCsrfToken extends Middleware
         if (str_starts_with($path, 'robokassa/') || 
             str_starts_with($pathInfo, 'robokassa/') || 
             $request->is('robokassa/*')) {
-            \Illuminate\Support\Facades\Log::info('VerifyCsrfToken: Пропуск CSRF для Робокассы', [
+            \Illuminate\Support\Facades\Log::info('VerifyCsrfToken: handle - Пропуск CSRF для Робокассы', [
                 'path' => $path,
                 'pathInfo' => $pathInfo,
+                'method' => $request->method(),
             ]);
             return $next($request);
         }
