@@ -54,22 +54,17 @@
         @foreach($products as $product)
         <a href="{{ route('products.show', $product->slug) }}" class="product-card">
             <div class="product-image-wrapper">
-                @if($product->featuredImage)
-                    <img src="{{ $product->featuredImage->image_url }}" alt="{{ $product->name }}" class="product-image" loading="lazy">
-                @else
-                    <div class="product-image-placeholder">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <path d="M3 9h18M9 21V9"/>
-                        </svg>
-                    </div>
-                @endif
-                @if($product->isInStock())
-                    <span class="product-badge product-badge-success">В наличии</span>
-                @else
-                    <span class="product-badge product-badge-out">Нет в наличии</span>
-                @endif
-            </div>
+                    @if($product->featuredImage)
+                        <img src="{{ $product->featuredImage->image_url }}" alt="{{ $product->name }}" class="product-image" loading="lazy">
+                    @else
+                        <div class="product-image-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <path d="M3 9h18M9 21V9"/>
+                            </svg>
+                        </div>
+                    @endif
+                </div>
             <div class="product-info">
                 <h3 class="product-name">{{ $product->name }}</h3>
                 @if($product->short_description)
@@ -161,7 +156,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: transform 0.3s ease;
 }
 

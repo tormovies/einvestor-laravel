@@ -76,11 +76,6 @@
                             </svg>
                         </div>
                     @endif
-                    @if($product->isInStock())
-                        <span class="product-badge product-badge-success">В наличии</span>
-                    @else
-                        <span class="product-badge product-badge-out">Нет в наличии</span>
-                    @endif
                 </div>
                 <div class="product-info">
                     <h3 class="product-name">{{ $product->name }}</h3>
@@ -403,7 +398,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: transform 0.3s ease;
 }
 
