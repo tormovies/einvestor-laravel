@@ -65,20 +65,47 @@ class RobokassaController extends Controller
      */
     public function success(Request $request)
     {
-        // Отладочная информация - сначала логируем все детали
-        $debugInfo = [
-            'method' => $request->method(),
-            'path' => $request->path(),
-            'full_url' => $request->fullUrl(),
-            'all_params' => $request->all(),
-            'query_params' => $request->query(),
-            'post_params' => $request->post(),
-            'headers' => $request->headers->all(),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'has_session' => $request->hasSession(),
-            'session_id' => $request->hasSession() ? session()->getId() : null,
-        ];
+        try {
+            // Отладочная информация - сначала логируем все детали
+            $debugInfo = [
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'full_url' => $request->fullUrl(),
+                'all_params' => $request->all(),
+                'query_params' => $request->query(),
+                'post_params' => $request->post(),
+                'headers' => array_map(function ($header) {
+                    return is_array($header) ? implode(', ', $header) : (string)$header;
+                }, $request->headers->all()),
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'has_session' => $request->hasSession(),
+                'session_id' => $request->hasSession() ? (session()->getId() ?? null) : null,
+            ];
+            
+            // Безопасно добавляем CSRF токен
+            try {
+                $debugInfo['csrf_token'] = csrf_token();
+            } catch (\Exception $e) {
+                $debugInfo['csrf_token'] = 'Не доступен';
+            }
+            
+            // Добавляем заголовки CSRF
+            try {
+                $debugInfo['x_csrf_token_header'] = $request->header('X-CSRF-TOKEN');
+                $debugInfo['x_xsrf_token_header'] = $request->header('X-XSRF-TOKEN');
+            } catch (\Exception $e) {
+                // Игнорируем ошибки заголовков
+            }
+        } catch (\Exception $e) {
+            // Если ошибка при формировании debug - создаем минимальный массив
+            $debugInfo = [
+                'error_creating_debug' => $e->getMessage(),
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'url' => $request->fullUrl(),
+            ];
+        }
         
         Log::info('Robokassa success URL called', $debugInfo);
         
@@ -88,7 +115,18 @@ class RobokassaController extends Controller
         if (!$invId) {
             Log::warning('Robokassa success: InvId not provided', $debugInfo);
             // Показываем отладочную информацию вместо редиректа
-            return response()->view('debug.robokassa', ['debug' => $debugInfo], 200);
+            try {
+                return response()->view('debug.robokassa', ['debug' => $debugInfo], 200);
+            } catch (\Exception $e) {
+                // Если ошибка при отображении view - возвращаем JSON
+                Log::error('Error rendering debug view', ['error' => $e->getMessage()]);
+                return response()->json([
+                    'status' => 'debug',
+                    'message' => 'InvId не предоставлен',
+                    'error' => $e->getMessage(),
+                    'debug' => $debugInfo
+                ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
+            }
         }
 
         $order = Order::find($invId);

@@ -74,11 +74,16 @@
             <strong>⚠️ Внимание:</strong> Это отладочная страница. CSRF проверка была пропущена для запроса от Робокассы.
         </div>
 
+        @if(!isset($debug))
+            <div class="warning">
+                <strong>Ошибка:</strong> Отладочная информация недоступна.
+            </div>
+        @else
         <div class="debug-section">
             <h2>Основная информация</h2>
             <div class="param-item">
                 <span class="param-key">Путь:</span> 
-                <span class="param-value">{{ $debug['path'] }}</span>
+                <span class="param-value">{{ $debug['path'] ?? 'не указан' }}</span>
             </div>
             <div class="param-item">
                 <span class="param-key">Метод:</span> 
@@ -86,7 +91,7 @@
             </div>
             <div class="param-item">
                 <span class="param-key">Полный URL:</span> 
-                <span class="param-value">{{ $debug['url'] }}</span>
+                <span class="param-value">{{ $debug['full_url'] ?? $debug['url'] ?? 'не указан' }}</span>
             </div>
             <div class="param-item">
                 <span class="param-key">IP адрес:</span> 
@@ -155,6 +160,7 @@
                 <span class="param-value">{{ $debug['x_xsrf_token_header'] ?? 'отсутствует' }}</span>
             </div>
         </div>
+        @endif
     </div>
 </body>
 </html>
