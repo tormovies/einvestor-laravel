@@ -34,6 +34,27 @@
         </div>
     </section>
 
+    <!-- View Toggle -->
+    <div class="view-toggle-wrapper">
+        <div class="view-toggle">
+            <button class="view-toggle-btn active" data-view="grid" title="Плиткой" aria-label="Отображение плиткой">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                </svg>
+            </button>
+            <button class="view-toggle-btn" data-view="list" title="Строками" aria-label="Отображение строками">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <!-- Featured Products Section -->
     @if($featuredProducts->count() > 0)
     <section class="products-section">
@@ -41,7 +62,7 @@
             <h2 class="section-title">Популярные товары</h2>
             <a href="{{ route('products.index') }}" class="section-link">Все товары →</a>
         </div>
-        <div class="products-grid">
+        <div class="products-grid" id="products-container">
             @foreach($featuredProducts as $product)
             <a href="{{ route('products.show', $product->slug) }}" class="product-card">
                 <div class="product-image-wrapper">
@@ -88,7 +109,7 @@
             <h2 class="section-title">Последние статьи</h2>
             <a href="{{ route('articles.index') }}" class="section-link">Все статьи →</a>
         </div>
-        <div class="articles-grid">
+        <div class="articles-grid" id="articles-container">
             @foreach($latestPosts as $post)
             <article class="article-card">
                 @if($post->featuredImage)
@@ -213,6 +234,52 @@
     66% { transform: translate(-20px, 20px) rotate(240deg); }
 }
 
+/* View Toggle */
+.view-toggle-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+    margin-top: -0.5rem;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.view-toggle-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    transition: all 0.3s;
+}
+
+.view-toggle-btn:hover {
+    background: #f3f4f6;
+    color: #2563eb;
+}
+
+.view-toggle-btn.active {
+    background: #2563eb;
+    color: white;
+}
+
+.view-toggle-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
 /* Section Styles */
 .section-header {
     display: flex;
@@ -252,6 +319,62 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
+}
+
+/* List View for Products */
+.products-grid.list-view {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.products-grid.list-view .product-card {
+    flex-direction: row;
+    max-width: 100%;
+}
+
+.products-grid.list-view .product-image-wrapper {
+    width: 140px;
+    min-width: 140px;
+    padding-top: 100px;
+    flex-shrink: 0;
+}
+
+.products-grid.list-view .product-info {
+    flex: 1;
+    padding: 0.625rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.products-grid.list-view .product-name {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    -webkit-line-clamp: 1;
+}
+
+.products-grid.list-view .product-description {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    -webkit-line-clamp: 1;
+}
+
+.products-grid.list-view .product-footer {
+    margin-top: 0.25rem;
+}
+
+.products-grid.list-view .product-price {
+    font-size: 1.1rem;
+}
+
+.products-grid.list-view .product-action-btn {
+    width: 28px;
+    height: 28px;
+}
+
+.products-grid.list-view .product-action-btn svg {
+    width: 14px;
+    height: 14px;
 }
 
 .product-card {
@@ -410,6 +533,52 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1rem;
+}
+
+/* List View for Articles */
+.articles-grid.list-view {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.articles-grid.list-view .article-card {
+    flex-direction: row;
+    max-width: 100%;
+}
+
+.articles-grid.list-view .article-image-wrapper {
+    width: 140px;
+    min-width: 140px;
+    padding-top: 100px;
+    flex-shrink: 0;
+}
+
+.articles-grid.list-view .article-content {
+    flex: 1;
+    padding: 0.625rem 0.875rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.articles-grid.list-view .article-meta {
+    margin-bottom: 0.375rem;
+    font-size: 0.7rem;
+}
+
+.articles-grid.list-view .article-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.375rem;
+}
+
+.articles-grid.list-view .article-excerpt {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    -webkit-line-clamp: 1;
+}
+
+.articles-grid.list-view .article-link {
+    font-size: 0.75rem;
 }
 
 .article-card {
@@ -577,14 +746,72 @@
         font-size: 0.9rem;
     }
     
-    .products-grid {
+    .products-grid:not(.list-view) {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    .articles-grid {
+    .articles-grid:not(.list-view) {
         grid-template-columns: 1fr;
+    }
+    
+    .products-grid.list-view .product-image-wrapper,
+    .articles-grid.list-view .article-image-wrapper {
+        width: 100px;
+        min-width: 100px;
+        padding-top: 70px;
+    }
+    
+    .products-grid.list-view .product-info,
+    .articles-grid.list-view .article-content {
+        padding: 0.5rem;
     }
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+(function() {
+    const STORAGE_KEY = 'home_view_mode';
+    const productsContainer = document.getElementById('products-container');
+    const articlesContainer = document.getElementById('articles-container');
+    const toggleButtons = document.querySelectorAll('.view-toggle-btn');
+    
+    // Загружаем сохраненный выбор или используем 'grid' по умолчанию
+    const savedView = localStorage.getItem(STORAGE_KEY) || 'grid';
+    
+    // Применяем сохраненный вид
+    function applyView(view) {
+        if (view === 'list') {
+            if (productsContainer) productsContainer.classList.add('list-view');
+            if (articlesContainer) articlesContainer.classList.add('list-view');
+        } else {
+            if (productsContainer) productsContainer.classList.remove('list-view');
+            if (articlesContainer) articlesContainer.classList.remove('list-view');
+        }
+        
+        // Обновляем активную кнопку
+        toggleButtons.forEach(btn => {
+            if (btn.dataset.view === view) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    
+    // Применяем сохраненный вид при загрузке
+    applyView(savedView);
+    
+    // Обработчики кликов на кнопки
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const view = this.dataset.view;
+            localStorage.setItem(STORAGE_KEY, view);
+            applyView(view);
+        });
+    });
+})();
+</script>
 @endpush
 @endsection

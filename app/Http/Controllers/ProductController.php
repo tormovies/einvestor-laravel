@@ -11,6 +11,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::where('status', 'publish')
+            ->with('featuredImage')
             ->orderBy('created_at', 'desc')
             ->paginate(12);
         

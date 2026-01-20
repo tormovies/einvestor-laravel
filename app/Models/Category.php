@@ -26,12 +26,12 @@ class Category extends Model
 
     public function posts(): BelongsToMany
     {
-        return $this->belongsToMany(Post::class, 'post_category')->where('type', 'post');
+        return $this->belongsToMany(Post::class, 'post_category');
     }
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'product_category')->where('type', 'product');
+        return $this->belongsToMany(Product::class, 'product_category');
     }
 
     public function getUrlAttribute(): string
