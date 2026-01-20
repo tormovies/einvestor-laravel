@@ -22,10 +22,23 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Обработка CSRF ошибок для Робокассы - показываем отладочную информацию
         $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
-            if ($request->is('robokassa/*')) {
+            $path = $request->path();
+            $pathInfo = trim($request->getPathInfo(), '/');
+            
+            // Проверяем разными способами
+            if (str_starts_with($path, 'robokassa/') || 
+                str_starts_with($pathInfo, 'robokassa/') || 
+                $request->is('robokassa/*')) {
+                
+                \Illuminate\Support\Facades\Log::warning('Global exception handler: CSRF для Робокассы', [
+                    'path' => $path,
+                    'pathInfo' => $pathInfo,
+                ]);
+                
                 $debugInfo = [
                     'error' => 'CSRF Token Mismatch',
-                    'path' => $request->path(),
+                    'path' => $path,
+                    'pathInfo' => $pathInfo,
                     'method' => $request->method(),
                     'url' => $request->fullUrl(),
                     'all_params' => $request->all(),

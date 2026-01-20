@@ -29,8 +29,18 @@ class VerifyCsrfToken extends Middleware
      */
     public function handle($request, \Closure $next)
     {
+        // Проверяем путь разными способами для надежности
+        $path = $request->path();
+        $pathInfo = trim($request->getPathInfo(), '/');
+        
         // Явно пропускаем все запросы к Робокассе без проверки CSRF
-        if ($request->is('robokassa/*')) {
+        if (str_starts_with($path, 'robokassa/') || 
+            str_starts_with($pathInfo, 'robokassa/') || 
+            $request->is('robokassa/*')) {
+            \Illuminate\Support\Facades\Log::info('VerifyCsrfToken: Пропуск CSRF для Робокассы', [
+                'path' => $path,
+                'pathInfo' => $pathInfo,
+            ]);
             return $next($request);
         }
 
@@ -38,23 +48,39 @@ class VerifyCsrfToken extends Middleware
             return parent::handle($request, $next);
         } catch (\Illuminate\Session\TokenMismatchException $e) {
             // Если ошибка CSRF для Робокассы - выдаем отладочную информацию
-            if ($request->is('robokassa/*')) {
-                return response()->json([
+            $path = $request->path();
+            $pathInfo = trim($request->getPathInfo(), '/');
+            
+            if (str_starts_with($path, 'robokassa/') || 
+                str_starts_with($pathInfo, 'robokassa/') || 
+                $request->is('robokassa/*')) {
+                \Illuminate\Support\Facades\Log::warning('VerifyCsrfToken: CSRF ошибка для Робокассы, возвращаем отладку', [
+                    'path' => $path,
+                    'pathInfo' => $pathInfo,
+                ]);
+                
+                $debugInfo = [
                     'error' => 'CSRF Token Mismatch',
-                    'debug' => [
-                        'path' => $request->path(),
-                        'method' => $request->method(),
-                        'url' => $request->fullUrl(),
-                        'all_params' => $request->all(),
-                        'headers' => $request->headers->all(),
-                        'has_session' => $request->hasSession(),
-                        'session_id' => $request->hasSession() ? session()->getId() : null,
-                        'csrf_token' => csrf_token(),
-                        'x_csrf_token_header' => $request->header('X-CSRF-TOKEN'),
-                        'x_xsrf_token_header' => $request->header('X-XSRF-TOKEN'),
-                    ],
-                    'message' => 'Для отладки: проверьте, что запрос от Робокассы не требует CSRF токен'
-                ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
+                    'path' => $path,
+                    'pathInfo' => $pathInfo,
+                    'method' => $request->method(),
+                    'url' => $request->fullUrl(),
+                    'all_params' => $request->all(),
+                    'query_params' => $request->query(),
+                    'post_params' => $request->post(),
+                    'headers' => array_map(function ($header) {
+                        return is_array($header) ? implode(', ', $header) : $header;
+                    }, $request->headers->all()),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'has_session' => $request->hasSession(),
+                    'session_id' => $request->hasSession() ? session()->getId() : null,
+                    'csrf_token' => csrf_token(),
+                    'x_csrf_token_header' => $request->header('X-CSRF-TOKEN'),
+                    'x_xsrf_token_header' => $request->header('X-XSRF-TOKEN'),
+                ];
+                
+                return response()->view('debug.robokassa', ['debug' => $debugInfo], 200);
             }
             throw $e;
         }
