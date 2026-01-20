@@ -135,7 +135,7 @@
         border: 1px solid #d1d5db;
         border-radius: 6px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        max-height: 200px;
+        max-height: 400px;
         overflow-y: auto;
         z-index: 1000;
         display: none;
@@ -467,7 +467,7 @@
                 </div>
                 <div class="image-input-wrapper">
                     <input type="file" name="image" id="image" accept="image/*" onchange="previewImage(this)">
-                    <span class="help-text">Рекомендуемый размер: 800x600px. Максимум 5MB</span>
+                    <span class="help-text">Рекомендуемый размер: 800x600px (соотношение 4:3). Оптимально для отображения на главной странице и в каталоге. Максимум 5MB</span>
                     @error('image') <span class="error">{{ $message }}</span> @enderror
                 </div>
             </div>
@@ -499,32 +499,12 @@
                 </div>
             @endif
             
-            <!-- Старый файл (для обратной совместимости) -->
-            @if($isEdit && $product && $product->file_path)
-                <div style="background: #fef3c7; padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem; border-left: 3px solid #f59e0b;">
-                    <strong>Старый файл (будет мигрирован):</strong> {{ $product->file_name ?: basename($product->file_path) }}
-                    @if($product->file_size)
-                        <span style="color: #6b7280;">({{ number_format($product->file_size / 1024, 2) }} KB)</span>
-                    @endif
-                    <div style="font-size: 0.875rem; color: #92400e; margin-top: 0.5rem;">
-                        ⚠️ Рекомендуется создать новый файл через форму ниже - старый файл будет сохранен для обратной совместимости
-                    </div>
-                </div>
-            @endif
-            
             <!-- Загрузка новых файлов -->
             <div style="margin-bottom: 0.5rem;">
                 <input type="file" name="files[]" id="files" multiple accept=".zip,.rar,.exe,.dll,.mq4,.mq5,.txt,.doc,.pdf">
                 <span class="help-text">Можно выбрать несколько файлов. Максимум 10MB каждый</span>
             </div>
             
-            <!-- Старое поле для обратной совместимости -->
-            <div style="margin-top: 0.5rem;">
-                <input type="file" name="file" id="file" accept=".zip,.rar,.exe,.dll,.mq4,.mq5">
-                <span class="help-text" style="font-size: 0.75rem; color: #6b7280;">Старое поле (для обратной совместимости)</span>
-            </div>
-            
-            @error('file') <span class="error">{{ $message }}</span> @enderror
             @error('files.*') <span class="error">{{ $message }}</span> @enderror
         </div>
         
@@ -833,7 +813,7 @@
         } else if (filtered.length === 0 && query.length > 0) {
             dropdown.innerHTML = '<div class="chips-dropdown-item disabled">Ничего не найдено</div>';
         } else {
-            filtered.slice(0, 10).forEach(item => {
+            filtered.forEach(item => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'chips-dropdown-item';
                 itemEl.textContent = item.name;

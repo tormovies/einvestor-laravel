@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\RedirectController as AdminRedirectController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -75,6 +76,9 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categ
 // Теги
 Route::get('/tag/{slug}', [TagController::class, 'show'])->name('tag.show');
 
+// Скачивание файлов статей (должен быть перед /{slug})
+Route::get('/post-file/{id}', [App\Http\Controllers\PostFileController::class, 'download'])->name('post-file.download');
+
 // Админ-панель (требует права администратора)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -105,8 +109,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Пользователи
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/{id}', [AdminUserController::class, 'show'])->name('users.show');
+    
+    // Настройки магазина
+    Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [AdminSettingsController::class, 'store'])->name('settings.store');
 });
 
 // Страницы (должен быть последним, так как перехватывает любые другие пути)
 Route::get('/{slug}', [PageController::class, 'show'])->name('pages.show')
-    ->where('slug', '^(?!articles|products|category|tag|cart|checkout|download|login|logout|account|admin|api|_home|_products_list|_articles_list).*$'); // Исключаем зарезервированные пути
+    ->where('slug', '^(?!articles|products|category|tag|cart|checkout|download|post-file|login|logout|account|admin|api|_home|_products_list|_articles_list).*$'); // Исключаем зарезервированные пути

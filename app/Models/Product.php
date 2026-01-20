@@ -16,8 +16,7 @@ class Product extends Model
     protected $fillable = [
         'wp_id', 'slug', 'name', 'description', 'short_description',
         'price', 'sku', 'stock_status', 'stock_quantity',
-        'status', 'featured_image_id', 'file_path', 'file_name',
-        'file_size', 'published_at',
+        'status', 'featured_image_id', 'published_at',
         'seo_title', 'seo_description', 'seo_h1', 'seo_intro_text'
     ];
 

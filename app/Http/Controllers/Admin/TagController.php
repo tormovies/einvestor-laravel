@@ -24,7 +24,7 @@ class TagController extends Controller
             $query->where('name', 'like', "%{$search}%");
         }
 
-        $tags = $query->paginate(30);
+        $tags = $query->paginate(30)->withQueryString();
 
         return view('admin.tags.index', compact('tags'));
     }

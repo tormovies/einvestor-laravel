@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
 use Illuminate\Support\Facades\Log;
 
 class RobokassaService
@@ -15,11 +16,27 @@ class RobokassaService
 
     public function __construct()
     {
-        $this->merchantLogin = config('robokassa.merchant_login', '');
-        $this->password1 = config('robokassa.password1', '');
-        $this->password2 = config('robokassa.password2', '');
-        $this->hashType = config('robokassa.hash_type', 'md5');
-        $this->isTest = config('robokassa.is_test', false);
+        // Читаем настройки из БД, если есть, иначе из config
+        $this->isTest = Setting::get('robokassa.is_test', config('robokassa.is_test', false));
+        $this->merchantLogin = Setting::get('robokassa.merchant_login', config('robokassa.merchant_login', ''));
+        $this->hashType = Setting::get('robokassa.hash_type', config('robokassa.hash_type', 'md5'));
+        
+        // Выбираем пароли в зависимости от режима
+        if ($this->isTest) {
+            $this->password1 = Setting::get('robokassa.password1_test', '');
+            $this->password2 = Setting::get('robokassa.password2_test', '');
+        } else {
+            $this->password1 = Setting::get('robokassa.password1_production', '');
+            $this->password2 = Setting::get('robokassa.password2_production', '');
+        }
+        
+        // Если в БД нет паролей, пытаемся взять из config (для обратной совместимости)
+        if (empty($this->password1)) {
+            $this->password1 = config('robokassa.password1', '');
+        }
+        if (empty($this->password2)) {
+            $this->password2 = config('robokassa.password2', '');
+        }
         
         // URL для тестового или продакшн режима
         if ($this->isTest) {

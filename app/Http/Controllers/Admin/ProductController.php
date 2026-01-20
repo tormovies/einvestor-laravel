@@ -70,7 +70,6 @@ class ProductController extends Controller
             'stock_quantity' => 'nullable|integer|min:0',
             'status' => 'required|in:publish,draft',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
-            'file' => 'nullable|file|max:10240', // 10MB max (для обратной совместимости)
             'files' => 'nullable|array',
             'files.*' => 'file|max:10240', // 10MB max каждый файл
             'delete_files' => 'nullable|array',
@@ -133,14 +132,6 @@ class ProductController extends Controller
             $validated['featured_image_id'] = $media->id;
         }
 
-        // Загрузка файла (для обратной совместимости - один файл в старые поля)
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $path = $file->store('products', 'local');
-            $validated['file_path'] = $path;
-            $validated['file_name'] = $file->getClientOriginalName();
-            $validated['file_size'] = $file->getSize();
-        }
 
         // Установка даты публикации
         if ($validated['status'] === 'publish' && !$request->has('published_at')) {
@@ -159,7 +150,7 @@ class ProductController extends Controller
         // Сохранение товара
         $categories = $validated['categories'] ?? [];
         $tags = $validated['tags'] ?? [];
-        unset($validated['categories'], $validated['tags'], $validated['file'], $validated['image']);
+        unset($validated['categories'], $validated['tags'], $validated['image']);
 
         try {
             $product = Product::create($validated);
@@ -286,7 +277,6 @@ class ProductController extends Controller
             'stock_quantity' => 'nullable|integer|min:0',
             'status' => 'required|in:publish,draft',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
-            'file' => 'nullable|file|max:10240', // 10MB max (для обратной совместимости)
             'files' => 'nullable|array',
             'files.*' => 'file|max:10240', // 10MB max каждый файл
             'delete_files' => 'nullable|array',
@@ -388,19 +378,6 @@ class ProductController extends Controller
             \Log::info('No image file in request');
         }
 
-        // Загрузка нового файла (старый удаляется) - для обратной совместимости
-        if ($request->hasFile('file')) {
-            // Удаление старого файла
-            if ($product->file_path && Storage::disk('local')->exists($product->file_path)) {
-                Storage::disk('local')->delete($product->file_path);
-            }
-
-            $file = $request->file('file');
-            $path = $file->store('products', 'local');
-            $validated['file_path'] = $path;
-            $validated['file_name'] = $file->getClientOriginalName();
-            $validated['file_size'] = $file->getSize();
-        }
 
         // Удаление выбранных файлов (обрабатываем ДО обновления товара)
         if ($request->has('delete_files')) {
@@ -448,7 +425,7 @@ class ProductController extends Controller
         
         // Удаляем поля, которые не должны попасть в update
         // НО НЕ удаляем description - оно должно сохраниться!
-        unset($validated['categories'], $validated['tags'], $validated['file'], $validated['files'], $validated['delete_files'], $validated['image']);
+        unset($validated['categories'], $validated['tags'], $validated['files'], $validated['delete_files'], $validated['image']);
 
         // Проверка: если base64 изображения все еще остались (на случай, если обработка до валидации не сработала)
         if (isset($validated['description']) && !empty($validated['description'])) {
@@ -532,12 +509,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        // Удаление файла (старый способ - для обратной совместимости)
-        if ($product->file_path && Storage::disk('local')->exists($product->file_path)) {
-            Storage::disk('local')->delete($product->file_path);
-        }
-
-        // Удаление всех файлов товара из новой таблицы
+        // Удаление всех файлов товара из таблицы product_files
         foreach ($product->files as $file) {
             if (Storage::disk('local')->exists($file->file_path)) {
                 Storage::disk('local')->delete($file->file_path);

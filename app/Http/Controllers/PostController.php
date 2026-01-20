@@ -24,6 +24,7 @@ class PostController extends Controller
     {
         $post = Post::where('slug', $slug)
             ->where('status', 'publish')
+            ->with('files')
             ->firstOrFail();
         
         $relatedPosts = Post::where('status', 'publish')

@@ -112,11 +112,6 @@
         <div class="articles-grid" id="articles-container">
             @foreach($latestPosts as $post)
             <article class="article-card">
-                @if($post->featuredImage)
-                <a href="{{ route('articles.show', $post->slug) }}" class="article-image-wrapper">
-                    <img src="{{ $post->featuredImage->image_url }}" alt="{{ $post->title }}" class="article-image" loading="lazy">
-                </a>
-                @endif
                 <div class="article-content">
                     <div class="article-meta">
                         <time class="article-date">{{ $post->published_at?->format('d.m.Y') }}</time>
@@ -317,8 +312,8 @@
 
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.875rem;
 }
 
 /* List View for Products */
@@ -397,7 +392,7 @@
 .product-image-wrapper {
     position: relative;
     width: 100%;
-    padding-top: 70%;
+    padding-top: 75%; /* Соотношение 4:3 (1.33:1) - оптимально для товаров */
     background: #f9fafb;
     overflow: hidden;
 }
@@ -456,14 +451,14 @@
 }
 
 .product-info {
-    padding: 0.875rem;
+    padding: 0.75rem;
     display: flex;
     flex-direction: column;
     flex: 1;
 }
 
 .product-name {
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #1f2937;
     margin-bottom: 0.375rem;
@@ -475,9 +470,9 @@
 }
 
 .product-description {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #6b7280;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.625rem;
     line-height: 1.4;
     flex: 1;
     display: -webkit-box;
@@ -494,7 +489,7 @@
 }
 
 .product-price {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #2563eb;
 }
@@ -721,8 +716,8 @@
         font-size: 1.75rem;
     }
     
-    .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    .products-grid:not(.list-view) {
+        grid-template-columns: repeat(3, 1fr);
         gap: 0.875rem;
     }
     

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Post extends Model
@@ -51,6 +52,11 @@ class Post extends Model
     {
         return $this->morphMany(Comment::class, 'commentable')
             ->where('status', 'approved');
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(PostFile::class)->orderBy('order');
     }
 
     public function getUrlAttribute(): string

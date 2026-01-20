@@ -45,24 +45,20 @@ class DownloadController extends Controller
         }
 
         // Определяем какой файл скачивать
-        // Если есть product_file_id - используем новый способ, иначе старый (file_path из products)
         $filePath = null;
         $fileName = null;
         
         if ($orderDownload->product_file_id) {
-            // Новый способ - файл из таблицы product_files
+            // Файл из таблицы product_files
             $productFile = $orderDownload->productFile;
             if (!$productFile || $productFile->product_id != $product->id) {
                 abort(404, 'Файл не найден');
             }
             $filePath = $productFile->file_path;
             $fileName = $productFile->file_name;
-        } elseif ($product->file_path) {
-            // Старый способ - файл из поля products.file_path (для обратной совместимости)
-            $filePath = $product->file_path;
-            $fileName = $product->file_name;
         } else {
             // Проверяем есть ли вообще файлы у товара
+            $product->load('files');
             if ($product->files->isEmpty()) {
                 abort(404, 'Файлы для этого товара не найдены');
             }
