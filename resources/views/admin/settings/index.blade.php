@@ -256,6 +256,84 @@
             </div>
         </div>
 
+        <div class="settings-section">
+            <h2>Настройки почты (SMTP)</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="mail_mailer">Драйвер почты *</label>
+                    <select name="mail_mailer" id="mail_mailer" required>
+                        <option value="smtp" {{ old('mail_mailer', $settings['mail_mailer']) === 'smtp' ? 'selected' : '' }}>SMTP</option>
+                        <option value="log" {{ old('mail_mailer', $settings['mail_mailer']) === 'log' ? 'selected' : '' }}>Log (только для разработки)</option>
+                        <option value="sendmail" {{ old('mail_mailer', $settings['mail_mailer']) === 'sendmail' ? 'selected' : '' }}>Sendmail</option>
+                    </select>
+                    <span class="help-text">Выберите способ отправки почты</span>
+                    @error('mail_mailer') <span class="error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="mail_host">SMTP Хост</label>
+                    <input type="text" name="mail_host" id="mail_host" value="{{ old('mail_host', $settings['mail_host']) }}" placeholder="smtp.example.com">
+                    <span class="help-text">Адрес SMTP сервера</span>
+                    @error('mail_host') <span class="error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="mail_port">SMTP Порт</label>
+                    <input type="number" name="mail_port" id="mail_port" value="{{ old('mail_port', $settings['mail_port']) }}" placeholder="587" min="1" max="65535">
+                    <span class="help-text">Обычно 587 для TLS или 465 для SSL</span>
+                    @error('mail_port') <span class="error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="mail_encryption">Шифрование</label>
+                    <select name="mail_encryption" id="mail_encryption">
+                        <option value="tls" {{ old('mail_encryption', $settings['mail_encryption']) === 'tls' ? 'selected' : '' }}>TLS</option>
+                        <option value="ssl" {{ old('mail_encryption', $settings['mail_encryption']) === 'ssl' ? 'selected' : '' }}>SSL</option>
+                        <option value="null" {{ old('mail_encryption', $settings['mail_encryption']) === 'null' ? 'selected' : '' }}>Без шифрования</option>
+                    </select>
+                    <span class="help-text">Тип шифрования соединения</span>
+                    @error('mail_encryption') <span class="error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="mail_username">SMTP Пользователь</label>
+                    <input type="text" name="mail_username" id="mail_username" value="{{ old('mail_username', $settings['mail_username']) }}" placeholder="user@example.com">
+                    <span class="help-text">Логин для авторизации на SMTP сервере</span>
+                    @error('mail_username') <span class="error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="mail_password">SMTP Пароль</label>
+                    <input type="password" name="mail_password" id="mail_password" value="" placeholder="{{ $settings['mail_password'] ? '●●●●●●●●' : 'Введите пароль' }}">
+                    <input type="hidden" name="mail_password_old" value="{{ $settings['mail_password'] }}">
+                    <span class="help-text">Пароль для авторизации на SMTP сервере. Оставьте пустым, чтобы не изменять.</span>
+                    @error('mail_password') <span class="error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="mail_from_address">Email отправителя</label>
+                    <input type="email" name="mail_from_address" id="mail_from_address" value="{{ old('mail_from_address', $settings['mail_from_address']) }}" placeholder="noreply@example.com">
+                    <span class="help-text">Email адрес, с которого будут отправляться письма</span>
+                    @error('mail_from_address') <span class="error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="mail_from_name">Имя отправителя</label>
+                    <input type="text" name="mail_from_name" id="mail_from_name" value="{{ old('mail_from_name', $settings['mail_from_name']) }}" placeholder="EInvestor">
+                    <span class="help-text">Имя, которое будет отображаться как отправитель</span>
+                    @error('mail_from_name') <span class="error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="mail_admin_email">Email администратора для уведомлений</label>
+                    <input type="email" name="mail_admin_email" id="mail_admin_email" value="{{ old('mail_admin_email', $settings['mail_admin_email']) }}" placeholder="admin@example.com">
+                    <span class="help-text">Email для отправки уведомлений о новых заказах и оплатах</span>
+                    @error('mail_admin_email') <span class="error">{{ $message }}</span> @enderror
+                </div>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Сохранить настройки</button>
         </div>
