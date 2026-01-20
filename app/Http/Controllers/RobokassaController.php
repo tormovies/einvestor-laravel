@@ -109,8 +109,22 @@ class RobokassaController extends Controller
         
         Log::info('Robokassa success URL called', $debugInfo);
         
-        // Получаем InvId из параметров
-        $invId = $request->input('InvId');
+        // Получаем InvId из параметров (может быть в GET или POST)
+        // Проверяем и в query string (GET), и в body (POST)
+        $invId = $request->input('InvId') 
+              ?? $request->query('InvId') 
+              ?? $request->post('InvId');
+        
+        Log::info('Robokassa success: InvId lookup', [
+            'method' => $request->method(),
+            'invId_from_input' => $request->input('InvId'),
+            'invId_from_query' => $request->query('InvId'),
+            'invId_from_post' => $request->post('InvId'),
+            'invId_final' => $invId,
+            'all_query' => $request->query(),
+            'all_post' => $request->post(),
+            'all_params' => $request->all(),
+        ]);
         
         if (!$invId) {
             Log::warning('Robokassa success: InvId not provided in URL', $debugInfo);
