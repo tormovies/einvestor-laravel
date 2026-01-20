@@ -174,6 +174,38 @@ class RobokassaController extends Controller
             }
         }
 
+        // В тестовом режиме Result URL может не вызываться
+        // Проверяем подпись и обновляем статус заказа, если он еще не оплачен
+        $outSum = $request->input('OutSum');
+        $signature = $request->input('SignatureValue');
+        
+        if ($outSum && $signature && $order->payment_status !== 'paid') {
+            $robokassaService = app(RobokassaService::class);
+            
+            // Проверяем подпись для Success URL (используем Password1)
+            if ($robokassaService->verifySuccessSignature((float)$outSum, (int)$invId, $signature)) {
+                // Подпись верная - обновляем статус заказа
+                Log::info('Robokassa success: Signature verified, updating order status', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->number,
+                    'note' => 'Result URL не вызвался, обновляем статус через Success URL',
+                ]);
+                
+                $order->update([
+                    'payment_status' => 'paid',
+                    'status' => 'processing',
+                    'payment_id' => 'robokassa',
+                ]);
+            } else {
+                Log::warning('Robokassa success: Invalid signature', [
+                    'order_id' => $order->id,
+                    'outSum' => $outSum,
+                    'invId' => $invId,
+                    'received_signature' => $signature,
+                ]);
+            }
+        }
+
         // Перенаправляем на страницу успеха с номером заказа в URL
         // Используем query параметр вместо сессии, чтобы избежать проблем с CSRF
         return redirect()->route('checkout.success', ['orderNumber' => $order->number, 'payment' => 'success']);

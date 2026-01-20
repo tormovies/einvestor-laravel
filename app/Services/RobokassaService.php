@@ -89,6 +89,23 @@ class RobokassaService
     }
 
     /**
+     * Проверка подписи для Success/Fail URL
+     * Формат: OutSum:InvId:Password1
+     */
+    public function verifySuccessSignature(float $amount, int $invoiceId, string $signature): bool
+    {
+        $signatureString = sprintf(
+            '%s:%s:%s',
+            number_format($amount, 2, '.', ''),
+            $invoiceId,
+            $this->password1
+        );
+
+        $expectedSignature = $this->hash($signatureString);
+        return strtoupper($signature) === strtoupper($expectedSignature);
+    }
+
+    /**
      * Создание URL для перенаправления на оплату
      */
     public function getPaymentUrl(float $amount, int $invoiceId, string $description, array $additionalParams = []): string
