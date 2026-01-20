@@ -61,18 +61,26 @@ class RobokassaController extends Controller
 
     /**
      * Страница успешной оплаты (Success URL)
+     * Робокасса может отправлять как GET, так и POST
      */
     public function success(Request $request)
     {
+        Log::info('Robokassa success URL called', [
+            'method' => $request->method(),
+            'all_params' => $request->all(),
+        ]);
+        
         $invId = $request->input('InvId');
         
         if (!$invId) {
+            Log::warning('Robokassa success: InvId not provided', $request->all());
             return redirect()->route('home');
         }
 
         $order = Order::find($invId);
         
         if (!$order) {
+            Log::warning('Robokassa success: Order not found', ['invId' => $invId]);
             return redirect()->route('home');
         }
 
@@ -86,11 +94,19 @@ class RobokassaController extends Controller
      */
     public function fail(Request $request)
     {
+        Log::info('Robokassa fail URL called', $request->all());
+        
         $invId = $request->input('InvId');
         
         $order = null;
         if ($invId) {
             $order = Order::find($invId);
+        }
+
+        // В тестовом режиме Робокасса может не передавать InvId
+        // Проверяем также другие возможные параметры
+        if (!$order && $request->has('OutSum')) {
+            Log::warning('Robokassa fail: Order not found by InvId', $request->all());
         }
 
         return view('checkout.fail', compact('order'));

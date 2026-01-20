@@ -93,9 +93,20 @@ class RobokassaService
      */
     public function getPaymentUrl(float $amount, int $invoiceId, string $description, array $additionalParams = []): string
     {
-        // Получаем URL из конфигурации
-        $successUrl = config('robokassa.success_url', env('APP_URL') . '/robokassa/success');
-        $failUrl = config('robokassa.fail_url', env('APP_URL') . '/robokassa/fail');
+        // Получаем базовый URL приложения
+        $appUrl = rtrim(config('app.url'), '/');
+        
+        // Формируем абсолютные URL для Success и Fail
+        $successUrl = $appUrl . '/robokassa/success';
+        $failUrl = $appUrl . '/robokassa/fail';
+        
+        // Если в конфиге указаны кастомные URL, используем их
+        if (config('robokassa.success_url')) {
+            $successUrl = config('robokassa.success_url');
+        }
+        if (config('robokassa.fail_url')) {
+            $failUrl = config('robokassa.fail_url');
+        }
         
         $params = array_merge([
             'MerchantLogin' => $this->merchantLogin,
@@ -108,6 +119,13 @@ class RobokassaService
             'SuccessURL' => $successUrl,
             'FailURL' => $failUrl,
         ], $additionalParams);
+
+        Log::info('Robokassa payment URL generated', [
+            'url' => $this->baseUrl,
+            'success_url' => $successUrl,
+            'fail_url' => $failUrl,
+            'is_test' => $this->isTest,
+        ]);
 
         return $this->baseUrl . '?' . http_build_query($params);
     }
