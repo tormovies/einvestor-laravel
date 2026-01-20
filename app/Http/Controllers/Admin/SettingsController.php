@@ -78,16 +78,17 @@ class SettingsController extends Controller
         Setting::set('robokassa.merchant_login', $robokassaValidated['merchant_login'], 'string', 'payment', 'Логин магазина в Робокассе');
         
         // Пароли: если поле пустое, сохраняем старое значение
-        $password1Test = !empty($robokassaValidated['password1_test']) 
+        // Проверяем именно на пустую строку, так как браузер может заполнить поле через автозаполнение
+        $password1Test = (isset($robokassaValidated['password1_test']) && $robokassaValidated['password1_test'] !== '') 
             ? $robokassaValidated['password1_test'] 
             : ($robokassaValidated['password1_test_old'] ?? '');
-        $password1Production = !empty($robokassaValidated['password1_production']) 
+        $password1Production = (isset($robokassaValidated['password1_production']) && $robokassaValidated['password1_production'] !== '') 
             ? $robokassaValidated['password1_production'] 
             : ($robokassaValidated['password1_production_old'] ?? '');
-        $password2Test = !empty($robokassaValidated['password2_test']) 
+        $password2Test = (isset($robokassaValidated['password2_test']) && $robokassaValidated['password2_test'] !== '') 
             ? $robokassaValidated['password2_test'] 
             : ($robokassaValidated['password2_test_old'] ?? '');
-        $password2Production = !empty($robokassaValidated['password2_production']) 
+        $password2Production = (isset($robokassaValidated['password2_production']) && $robokassaValidated['password2_production'] !== '') 
             ? $robokassaValidated['password2_production'] 
             : ($robokassaValidated['password2_production_old'] ?? '');
         
@@ -105,7 +106,8 @@ class SettingsController extends Controller
         Setting::set('mail.username', $mailValidated['mail_username'] ?? '', 'string', 'email', 'SMTP пользователь');
         
         // Пароль почты: если поле пустое, сохраняем старое значение
-        $mailPassword = !empty($mailValidated['mail_password']) 
+        // Проверяем именно на пустую строку
+        $mailPassword = (isset($mailValidated['mail_password']) && $mailValidated['mail_password'] !== '') 
             ? $mailValidated['mail_password'] 
             : ($mailValidated['mail_password_old'] ?? '');
         Setting::set('mail.password', $mailPassword, 'string', 'email', 'SMTP пароль');

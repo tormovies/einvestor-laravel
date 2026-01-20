@@ -213,7 +213,7 @@
 
                 <div class="form-group">
                     <label for="password1_test">Пароль #1 (Тестовый)</label>
-                    <input type="password" name="password1_test" id="password1_test" value="" placeholder="{{ $settings['password1_test'] ? '●●●●●●●●' : 'Введите пароль' }}">
+                    <input type="password" name="password1_test" id="password1_test" value="" placeholder="{{ $settings['password1_test'] ? '●●●●●●●●' : 'Введите пароль' }}" autocomplete="new-password" data-form-type="other">
                     <input type="hidden" name="password1_test_old" value="{{ $settings['password1_test'] }}">
                     <span class="help-text">Пароль для создания платежей в тестовом режиме. Оставьте пустым, чтобы не изменять.</span>
                     @error('password1_test') <span class="error">{{ $message }}</span> @enderror
@@ -221,7 +221,7 @@
 
                 <div class="form-group">
                     <label for="password1_production">Пароль #1 (Рабочий)</label>
-                    <input type="password" name="password1_production" id="password1_production" value="" placeholder="{{ $settings['password1_production'] ? '●●●●●●●●' : 'Введите пароль' }}">
+                    <input type="password" name="password1_production" id="password1_production" value="" placeholder="{{ $settings['password1_production'] ? '●●●●●●●●' : 'Введите пароль' }}" autocomplete="new-password" data-form-type="other">
                     <input type="hidden" name="password1_production_old" value="{{ $settings['password1_production'] }}">
                     <span class="help-text">Пароль для создания платежей в рабочем режиме. Оставьте пустым, чтобы не изменять.</span>
                     @error('password1_production') <span class="error">{{ $message }}</span> @enderror
@@ -229,7 +229,7 @@
 
                 <div class="form-group">
                     <label for="password2_test">Пароль #2 (Тестовый)</label>
-                    <input type="password" name="password2_test" id="password2_test" value="" placeholder="{{ $settings['password2_test'] ? '●●●●●●●●' : 'Введите пароль' }}">
+                    <input type="password" name="password2_test" id="password2_test" value="" placeholder="{{ $settings['password2_test'] ? '●●●●●●●●' : 'Введите пароль' }}" autocomplete="new-password" data-form-type="other">
                     <input type="hidden" name="password2_test_old" value="{{ $settings['password2_test'] }}">
                     <span class="help-text">Пароль для проверки уведомлений в тестовом режиме. Оставьте пустым, чтобы не изменять.</span>
                     @error('password2_test') <span class="error">{{ $message }}</span> @enderror
@@ -237,7 +237,7 @@
 
                 <div class="form-group">
                     <label for="password2_production">Пароль #2 (Рабочий)</label>
-                    <input type="password" name="password2_production" id="password2_production" value="" placeholder="{{ $settings['password2_production'] ? '●●●●●●●●' : 'Введите пароль' }}">
+                    <input type="password" name="password2_production" id="password2_production" value="" placeholder="{{ $settings['password2_production'] ? '●●●●●●●●' : 'Введите пароль' }}" autocomplete="new-password" data-form-type="other">
                     <input type="hidden" name="password2_production_old" value="{{ $settings['password2_production'] }}">
                     <span class="help-text">Пароль для проверки уведомлений в рабочем режиме. Оставьте пустым, чтобы не изменять.</span>
                     @error('password2_production') <span class="error">{{ $message }}</span> @enderror
@@ -305,7 +305,7 @@
 
                 <div class="form-group">
                     <label for="mail_password">SMTP Пароль</label>
-                    <input type="password" name="mail_password" id="mail_password" value="" placeholder="{{ $settings['mail_password'] ? '●●●●●●●●' : 'Введите пароль' }}">
+                    <input type="password" name="mail_password" id="mail_password" value="" placeholder="{{ $settings['mail_password'] ? '●●●●●●●●' : 'Введите пароль' }}" autocomplete="new-password" data-form-type="other">
                     <input type="hidden" name="mail_password_old" value="{{ $settings['mail_password'] }}">
                     <span class="help-text">Пароль для авторизации на SMTP сервере. Оставьте пустым, чтобы не изменять.</span>
                     @error('mail_password') <span class="error">{{ $message }}</span> @enderror
