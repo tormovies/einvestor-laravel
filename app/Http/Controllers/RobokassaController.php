@@ -109,21 +109,39 @@ class RobokassaController extends Controller
         
         Log::info('Robokassa success URL called', $debugInfo);
         
-        // ВО ВРЕМЯ ОТЛАДКИ: если нет InvId, показываем отладочную информацию
+        // Получаем InvId из параметров
         $invId = $request->input('InvId');
         
         if (!$invId) {
-            Log::warning('Robokassa success: InvId not provided', $debugInfo);
-            // Показываем отладочную информацию вместо редиректа
+            Log::warning('Robokassa success: InvId not provided in URL', $debugInfo);
+            
+            // В тестовом режиме Робокасса может не передавать InvId в Success URL
+            // Пытаемся найти последний заказ пользователя со статусом 'pending'
+            // или полагаемся на Result URL, который уже подтвердил оплату
+            
+            // Если пользователь авторизован - ищем его последний неоплаченный заказ
+            if (auth()->check()) {
+                $order = Order::where('user_id', auth()->id())
+                    ->where('status', 'pending')
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                
+                if ($order && $order->payment_status === 'paid') {
+                    // Result URL уже подтвердил оплату
+                    Log::info('Robokassa success: Found paid order for user', ['order_id' => $order->id]);
+                    return redirect()->route('checkout.success', ['orderNumber' => $order->number, 'payment' => 'success']);
+                }
+            }
+            
+            // В режиме отладки показываем информацию
             try {
+                $debugInfo['note'] = 'InvId не передан. В тестовом режиме Робокасса может не передавать параметры. Проверьте настройки в личном кабинете Робокассы.';
                 return response()->view('debug.robokassa', ['debug' => $debugInfo], 200);
             } catch (\Exception $e) {
-                // Если ошибка при отображении view - возвращаем JSON
                 Log::error('Error rendering debug view', ['error' => $e->getMessage()]);
                 return response()->json([
-                    'status' => 'debug',
-                    'message' => 'InvId не предоставлен',
-                    'error' => $e->getMessage(),
+                    'status' => 'warning',
+                    'message' => 'InvId не предоставлен. Проверьте настройки Робокассы.',
                     'debug' => $debugInfo
                 ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
             }
@@ -134,15 +152,12 @@ class RobokassaController extends Controller
         if (!$order) {
             Log::warning('Robokassa success: Order not found', ['invId' => $invId] + $debugInfo);
             // В режиме отладки показываем информацию
-            if (config('app.debug')) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Заказ не найден',
-                    'invId' => $invId,
-                    'debug' => $debugInfo
-                ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
+            try {
+                $debugInfo['note'] = 'Заказ не найден по InvId: ' . $invId;
+                return response()->view('debug.robokassa', ['debug' => $debugInfo], 200);
+            } catch (\Exception $e) {
+                return redirect()->route('home');
             }
-            return redirect()->route('home');
         }
 
         // Перенаправляем на страницу успеха с номером заказа в URL
