@@ -13,7 +13,13 @@ class RedirectMiddleware
     {
         // Проверяем редиректы только для GET запросов
         if ($request->isMethod('GET')) {
-            $path = trim($request->path(), '/');
+            // Получаем путь из запроса
+            // Используем getPathInfo() чтобы получить путь как есть, без декодирования
+            // Это важно для URL-encoded кириллицы (%d0%b8...)
+            $path = trim($request->getPathInfo(), '/');
+            
+            // Также пробуем декодированную версию (на случай если Laravel уже декодировал)
+            $decodedPath = trim($request->path(), '/');
             
             // Исключаем системные пути - они обрабатываются роутингом
             $excludedPaths = [
@@ -41,7 +47,13 @@ class RedirectMiddleware
             }
             
             // Проверяем таблицу редиректов
+            // Пробуем сначала с путем как есть (может быть URL-encoded)
             $redirect = Redirect::findRedirect($path);
+            
+            // Если не нашли и пути разные, пробуем декодированную версию
+            if (!$redirect && $decodedPath !== $path) {
+                $redirect = Redirect::findRedirect($decodedPath);
+            }
             
             if ($redirect) {
                 // Нормализуем URL для сравнения (убираем начальный слеш)

@@ -47,7 +47,11 @@
             @foreach($posts as $post)
             <tr style="border-bottom: 1px solid #e5e7eb;">
                 <td style="padding: 0.5rem;">
-                    <div style="font-size: 0.875rem; font-weight: 500;">{{ $post->title }}</div>
+                    <div style="font-size: 0.875rem; font-weight: 500;">
+                        <a href="{{ route('articles.show', $post->slug) }}" target="_blank" style="color: #2563eb; text-decoration: none;">
+                            {{ $post->title }}
+                        </a>
+                    </div>
                     @if($post->excerpt)
                     <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.125rem;">
                         {{ Str::limit(strip_tags($post->excerpt), 50) }}
@@ -80,6 +84,9 @@
                 <td style="padding: 0.5rem; font-size: 0.875rem;">{{ $post->created_at->format('d.m.Y') }}</td>
                 <td style="padding: 0.5rem; text-align: center;">
                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                        <a href="{{ route('articles.show', $post->slug) }}" target="_blank"
+                           style="padding: 0.5rem; text-decoration: none; color: #2563eb; font-size: 1.25rem;" 
+                           title="Просмотр">👁️</a>
                         <a href="{{ route('admin.posts.edit', $post->id) }}" 
                            style="padding: 0.5rem; text-decoration: none; color: #2563eb; font-size: 1.25rem;" 
                            title="Редактировать">✏️</a>

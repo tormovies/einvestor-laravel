@@ -341,8 +341,13 @@ class ImportWordPressCommand extends Command
         
         $count = 0;
         foreach ($redirects as $redirect) {
+            // Получаем путь из старого URL
             $oldUrl = parse_url($redirect['old_url'], PHP_URL_PATH) ?: $redirect['old_url'];
             $oldUrl = ltrim($oldUrl, '/');
+            
+            // ВАЖНО: НЕ декодируем URL - сохраняем как есть (может быть URL-encoded кириллица)
+            // Если old_url содержит URL-encoded символы (%d0%b8...), сохраняем их как есть
+            // Это нужно для правильной работы редиректов со старыми WordPress URL
             
             // Определяем новый URL в зависимости от типа
             $newUrl = match($redirect['type'] ?? '') {

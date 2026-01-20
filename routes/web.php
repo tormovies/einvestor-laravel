@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\RedirectController as AdminRedirectController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -97,6 +98,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     // Теги
     Route::resource('tags', AdminTagController::class);
+    
+    // Редиректы
+    Route::resource('redirects', AdminRedirectController::class);
     
     // Пользователи
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');

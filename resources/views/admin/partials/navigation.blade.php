@@ -49,6 +49,13 @@
             🏷️ Теги
         </a>
         
+        <a href="{{ route('admin.redirects.index') }}" 
+           style="display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 0.5rem 1rem; background: {{ request()->routeIs('admin.redirects.*') ? '#9333ea' : '#6b7280' }}; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; font-size: 0.875rem; transition: background 0.2s; box-sizing: border-box; white-space: nowrap;"
+           onmouseover="this.style.background='#9333ea'" 
+           onmouseout="this.style.background='{{ request()->routeIs('admin.redirects.*') ? '#9333ea' : '#6b7280' }}'">
+            🔀 Редиректы
+        </a>
+        
         <a href="{{ route('admin.users.index') }}" 
            style="display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 0.5rem 1rem; background: {{ request()->routeIs('admin.users.*') ? '#ea580c' : '#6b7280' }}; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; font-size: 0.875rem; transition: background 0.2s; box-sizing: border-box; white-space: nowrap;"
            onmouseover="this.style.background='#ea580c'" 
