@@ -70,8 +70,18 @@ class Order extends Model
                 );
                 $order->update(['user_id' => $user->id]);
                 
-                // TODO: Отправляем пароль на email
-                // Mail::to($user->email)->send(new UserCreatedMail($user, $password));
+                // Отправляем пароль на email
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                        new \App\Mail\UserCreatedMail($user, $password)
+                    );
+                } catch (\Exception $e) {
+                    // Логируем ошибку, но не прерываем выполнение
+                    \Illuminate\Support\Facades\Log::error('Failed to send user created email', [
+                        'email' => $user->email,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
 
             // Создание записей OrderDownload теперь происходит в CheckoutController
