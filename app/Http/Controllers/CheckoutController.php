@@ -111,11 +111,31 @@ class CheckoutController extends Controller
                     'subtotal' => $item['subtotal'],
                 ]);
 
-                // Создаем запись для скачивания файла, если он есть
-                if ($item['product']->file_path) {
+                // Создаем записи для скачивания файлов
+                // Сначала для файлов из новой таблицы product_files
+                $product = $item['product'];
+                $product->load('files');
+                
+                if ($product->files->isNotEmpty()) {
+                    // Создаем OrderDownload для каждого файла товара
+                    foreach ($product->files as $productFile) {
+                        OrderDownload::create([
+                            'order_id' => $order->id,
+                            'order_item_id' => $orderItem->id,
+                            'product_file_id' => $productFile->id,
+                            'user_id' => $order->user_id,
+                            'email' => $order->email,
+                            'download_token' => Str::random(64),
+                            'download_limit' => 5,
+                            'expires_at' => now()->addYear(),
+                        ]);
+                    }
+                } elseif ($product->file_path) {
+                    // Старый способ - для обратной совместимости (если есть file_path в products)
                     OrderDownload::create([
                         'order_id' => $order->id,
                         'order_item_id' => $orderItem->id,
+                        'product_file_id' => null, // Старый файл без product_file_id
                         'user_id' => $order->user_id,
                         'email' => $order->email,
                         'download_token' => Str::random(64),

@@ -61,7 +61,7 @@ class AccountController extends Controller
             ->whereHas('order', function ($query) {
                 $query->where('payment_status', 'paid');
             })
-            ->with(['orderItem.product', 'order'])
+            ->with(['orderItem.product', 'order', 'productFile'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
         

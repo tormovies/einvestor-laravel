@@ -54,6 +54,11 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function files(): HasMany
+    {
+        return $this->hasMany(ProductFile::class)->orderBy('order');
+    }
+
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');

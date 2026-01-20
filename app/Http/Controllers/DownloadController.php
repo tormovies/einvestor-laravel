@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrderDownload;
+use App\Models\ProductFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -34,8 +35,8 @@ class DownloadController extends Controller
         }
 
         $product = $orderItem->product;
-        if (!$product || !$product->file_path) {
-            abort(404, 'Файл для этого товара не найден');
+        if (!$product) {
+            abort(404, 'Товар не найден');
         }
 
         // Проверяем, что заказ оплачен
@@ -43,9 +44,33 @@ class DownloadController extends Controller
             abort(403, 'Заказ еще не оплачен');
         }
 
-        // Формируем путь к файлу
-        // file_path может быть относительным (от storage/app) или абсолютным
-        $filePath = $product->file_path;
+        // Определяем какой файл скачивать
+        // Если есть product_file_id - используем новый способ, иначе старый (file_path из products)
+        $filePath = null;
+        $fileName = null;
+        
+        if ($orderDownload->product_file_id) {
+            // Новый способ - файл из таблицы product_files
+            $productFile = $orderDownload->productFile;
+            if (!$productFile || $productFile->product_id != $product->id) {
+                abort(404, 'Файл не найден');
+            }
+            $filePath = $productFile->file_path;
+            $fileName = $productFile->file_name;
+        } elseif ($product->file_path) {
+            // Старый способ - файл из поля products.file_path (для обратной совместимости)
+            $filePath = $product->file_path;
+            $fileName = $product->file_name;
+        } else {
+            // Проверяем есть ли вообще файлы у товара
+            if ($product->files->isEmpty()) {
+                abort(404, 'Файлы для этого товара не найдены');
+            }
+            // Если файлов несколько, но не указан product_file_id, берем первый
+            $productFile = $product->files->first();
+            $filePath = $productFile->file_path;
+            $fileName = $productFile->file_name;
+        }
         $absolutePath = null;
 
         // Пробуем разные варианты расположения файла
@@ -76,8 +101,10 @@ class DownloadController extends Controller
         // Увеличиваем счетчик скачиваний
         $orderDownload->incrementDownloadCount();
 
-        // Получаем имя файла для скачивания
-        $fileName = $product->file_name ?? basename($filePath);
+        // Если имя файла не определено, берем из пути
+        if (!$fileName) {
+            $fileName = basename($filePath);
+        }
 
         // Возвращаем файл для скачивания
         return response()->download($filePath, $fileName, [

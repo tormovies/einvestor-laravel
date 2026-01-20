@@ -473,20 +473,59 @@
             </div>
         </div>
         
-        <!-- Файл для скачивания -->
+        <!-- Файлы для скачивания -->
         <div class="form-group full-width">
-            <label for="file">Файл для скачивания</label>
+            <label>Файлы для скачивания</label>
+            
+            <!-- Список существующих файлов (из новой таблицы product_files) -->
+            @if($isEdit && $product && $product->files->count() > 0)
+                <div style="background: #f9fafb; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                    <strong style="display: block; margin-bottom: 0.5rem;">Загруженные файлы:</strong>
+                    @foreach($product->files as $file)
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: white; border-radius: 4px; margin-bottom: 0.25rem; border: 1px solid #e5e7eb;">
+                            <div style="flex: 1;">
+                                <strong>{{ $file->file_name }}</strong>
+                                @if($file->file_size)
+                                    <span style="color: #6b7280; font-size: 0.875rem;">({{ $file->formatted_size }})</span>
+                                @endif
+                            </div>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="delete_files[]" value="{{ $file->id }}" 
+                                       style="width: 1.25rem; height: 1.25rem;">
+                                <span style="color: #dc2626; font-size: 0.875rem;">Удалить</span>
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            
+            <!-- Старый файл (для обратной совместимости) -->
             @if($isEdit && $product && $product->file_path)
-                <div style="background: #f9fafb; padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
-                    <strong>Текущий файл:</strong> {{ $product->file_name ?: basename($product->file_path) }}
+                <div style="background: #fef3c7; padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem; border-left: 3px solid #f59e0b;">
+                    <strong>Старый файл (будет мигрирован):</strong> {{ $product->file_name ?: basename($product->file_path) }}
                     @if($product->file_size)
                         <span style="color: #6b7280;">({{ number_format($product->file_size / 1024, 2) }} KB)</span>
                     @endif
+                    <div style="font-size: 0.875rem; color: #92400e; margin-top: 0.5rem;">
+                        ⚠️ Рекомендуется создать новый файл через форму ниже - старый файл будет сохранен для обратной совместимости
+                    </div>
                 </div>
             @endif
-            <input type="file" name="file" id="file" accept=".zip,.rar,.exe,.dll,.mq4,.mq5">
-            <span class="help-text">Максимум 10MB</span>
+            
+            <!-- Загрузка новых файлов -->
+            <div style="margin-bottom: 0.5rem;">
+                <input type="file" name="files[]" id="files" multiple accept=".zip,.rar,.exe,.dll,.mq4,.mq5,.txt,.doc,.pdf">
+                <span class="help-text">Можно выбрать несколько файлов. Максимум 10MB каждый</span>
+            </div>
+            
+            <!-- Старое поле для обратной совместимости -->
+            <div style="margin-top: 0.5rem;">
+                <input type="file" name="file" id="file" accept=".zip,.rar,.exe,.dll,.mq4,.mq5">
+                <span class="help-text" style="font-size: 0.75rem; color: #6b7280;">Старое поле (для обратной совместимости)</span>
+            </div>
+            
             @error('file') <span class="error">{{ $message }}</span> @enderror
+            @error('files.*') <span class="error">{{ $message }}</span> @enderror
         </div>
         
         <!-- Категории (чипсы с поиском) -->

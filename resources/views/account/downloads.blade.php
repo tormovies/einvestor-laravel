@@ -25,6 +25,11 @@
                     <td style="padding: 1rem;">
                         @if($download->orderItem && $download->orderItem->product)
                         <strong>{{ $download->orderItem->product->name }}</strong>
+                        @if($download->productFile)
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">
+                                📄 {{ $download->productFile->file_name }}
+                            </div>
+                        @endif
                         @elseif($download->orderItem)
                         <strong>{{ $download->orderItem->product_name }}</strong>
                         @else
