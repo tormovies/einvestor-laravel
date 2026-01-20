@@ -65,22 +65,51 @@ class RobokassaController extends Controller
      */
     public function success(Request $request)
     {
-        Log::info('Robokassa success URL called', [
+        // Отладочная информация - сначала логируем все детали
+        $debugInfo = [
             'method' => $request->method(),
+            'path' => $request->path(),
+            'full_url' => $request->fullUrl(),
             'all_params' => $request->all(),
-        ]);
+            'query_params' => $request->query(),
+            'post_params' => $request->post(),
+            'headers' => $request->headers->all(),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'has_session' => $request->hasSession(),
+            'session_id' => $request->hasSession() ? session()->getId() : null,
+        ];
+        
+        Log::info('Robokassa success URL called', $debugInfo);
         
         $invId = $request->input('InvId');
         
         if (!$invId) {
-            Log::warning('Robokassa success: InvId not provided', $request->all());
+            Log::warning('Robokassa success: InvId not provided', $debugInfo);
+            // В режиме отладки показываем информацию
+            if (config('app.debug')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'InvId не предоставлен',
+                    'debug' => $debugInfo
+                ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
+            }
             return redirect()->route('home');
         }
 
         $order = Order::find($invId);
         
         if (!$order) {
-            Log::warning('Robokassa success: Order not found', ['invId' => $invId]);
+            Log::warning('Robokassa success: Order not found', ['invId' => $invId] + $debugInfo);
+            // В режиме отладки показываем информацию
+            if (config('app.debug')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Заказ не найден',
+                    'invId' => $invId,
+                    'debug' => $debugInfo
+                ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
+            }
             return redirect()->route('home');
         }
 
@@ -94,7 +123,22 @@ class RobokassaController extends Controller
      */
     public function fail(Request $request)
     {
-        Log::info('Robokassa fail URL called', $request->all());
+        // Отладочная информация - сначала логируем все детали
+        $debugInfo = [
+            'method' => $request->method(),
+            'path' => $request->path(),
+            'full_url' => $request->fullUrl(),
+            'all_params' => $request->all(),
+            'query_params' => $request->query(),
+            'post_params' => $request->post(),
+            'headers' => $request->headers->all(),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'has_session' => $request->hasSession(),
+            'session_id' => $request->hasSession() ? session()->getId() : null,
+        ];
+        
+        Log::info('Robokassa fail URL called', $debugInfo);
         
         $invId = $request->input('InvId');
         
@@ -106,7 +150,17 @@ class RobokassaController extends Controller
         // В тестовом режиме Робокасса может не передавать InvId
         // Проверяем также другие возможные параметры
         if (!$order && $request->has('OutSum')) {
-            Log::warning('Robokassa fail: Order not found by InvId', $request->all());
+            Log::warning('Robokassa fail: Order not found by InvId', $debugInfo);
+        }
+
+        // В режиме отладки можем показывать JSON вместо страницы
+        if (config('app.debug') && $request->wantsJson()) {
+            return response()->json([
+                'status' => 'fail',
+                'invId' => $invId,
+                'order_found' => $order !== null,
+                'debug' => $debugInfo
+            ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
         }
 
         return view('checkout.fail', compact('order'));

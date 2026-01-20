@@ -34,6 +34,29 @@ class VerifyCsrfToken extends Middleware
             return $next($request);
         }
 
-        return parent::handle($request, $next);
+        try {
+            return parent::handle($request, $next);
+        } catch (\Illuminate\Session\TokenMismatchException $e) {
+            // Если ошибка CSRF для Робокассы - выдаем отладочную информацию
+            if ($request->is('robokassa/*')) {
+                return response()->json([
+                    'error' => 'CSRF Token Mismatch',
+                    'debug' => [
+                        'path' => $request->path(),
+                        'method' => $request->method(),
+                        'url' => $request->fullUrl(),
+                        'all_params' => $request->all(),
+                        'headers' => $request->headers->all(),
+                        'has_session' => $request->hasSession(),
+                        'session_id' => $request->hasSession() ? session()->getId() : null,
+                        'csrf_token' => csrf_token(),
+                        'x_csrf_token_header' => $request->header('X-CSRF-TOKEN'),
+                        'x_xsrf_token_header' => $request->header('X-XSRF-TOKEN'),
+                    ],
+                    'message' => 'Для отладки: проверьте, что запрос от Робокассы не требует CSRF токен'
+                ], 200, ['Content-Type' => 'application/json; charset=utf-8']);
+            }
+            throw $e;
+        }
     }
 }
