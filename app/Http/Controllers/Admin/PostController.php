@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Traits\CreatesRedirectOnDelete;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
+    use CreatesRedirectOnDelete;
     /**
      * Список постов
      */
@@ -189,9 +191,22 @@ class PostController extends Controller
     public function destroy($id)
     {
         $post = Post::findOrFail($id);
+        
+        // Получаем URL поста для редиректа (до удаления)
+        $oldUrl = $this->getUrlForRedirect($post);
+        
+        // Удаляем пост
         $post->delete();
+        
+        // Создаем или обновляем редирект на главную страницу
+        $redirect = $this->createRedirectToHome($oldUrl);
+        
+        $message = 'Пост успешно удален';
+        if ($redirect) {
+            $message .= '. Создан редирект 301: ' . $oldUrl . ' → /';
+        }
 
         return redirect()->route('admin.posts.index')
-            ->with('success', 'Пост успешно удален');
+            ->with('success', $message);
     }
 }

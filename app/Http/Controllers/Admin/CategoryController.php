@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Traits\CreatesRedirectOnDelete;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    use CreatesRedirectOnDelete;
     /**
      * Список категорий
      */
@@ -146,9 +148,28 @@ class CategoryController extends Controller
                 ->with('error', 'Нельзя удалить категорию с дочерними категориями');
         }
 
+        // Получаем URL категории для редиректа (до удаления)
+        $oldUrl = $this->getUrlForRedirect($category);
+        
+        // Удаляем связи категории из материалов (постов и товаров)
+        // Это происходит автоматически через onDelete('cascade') в pivot таблицах,
+        // но для надежности удаляем явно
+        $category->posts()->detach();
+        $category->products()->detach();
+        
+        // Удаляем категорию
         $category->delete();
+        
+        // Создаем или обновляем редирект на главную страницу
+        $redirect = $this->createRedirectToHome($oldUrl);
+        
+        $message = 'Категория успешно удалена';
+        if ($redirect) {
+            $message .= '. Создан редирект 301: ' . $oldUrl . ' → /';
+        }
+        $message .= '. Все упоминания категории в материалах удалены.';
 
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Категория успешно удалена');
+            ->with('success', $message);
     }
 }

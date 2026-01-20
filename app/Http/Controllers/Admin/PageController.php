@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Traits\CreatesRedirectOnDelete;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PageController extends Controller
 {
+    use CreatesRedirectOnDelete;
     /**
      * Список страниц
      */
@@ -191,9 +193,21 @@ class PageController extends Controller
                 ->with('error', 'Нельзя удалить системную страницу');
         }
         
+        // Получаем URL страницы для редиректа (до удаления)
+        $oldUrl = $this->getUrlForRedirect($page);
+        
+        // Удаляем страницу
         $page->delete();
+        
+        // Создаем или обновляем редирект на главную страницу
+        $redirect = $this->createRedirectToHome($oldUrl);
+        
+        $message = 'Страница успешно удалена';
+        if ($redirect) {
+            $message .= '. Создан редирект 301: ' . $oldUrl . ' → /';
+        }
 
         return redirect()->route('admin.pages.index')
-            ->with('success', 'Страница успешно удалена');
+            ->with('success', $message);
     }
 }

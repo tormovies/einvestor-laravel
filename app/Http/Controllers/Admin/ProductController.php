@@ -8,12 +8,14 @@ use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductFile;
 use App\Models\Tag;
+use App\Traits\CreatesRedirectOnDelete;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    use CreatesRedirectOnDelete;
     /**
      * Список товаров
      */
@@ -543,10 +545,22 @@ class ProductController extends Controller
             $file->delete();
         }
 
+        // Получаем URL товара для редиректа (до удаления)
+        $oldUrl = $this->getUrlForRedirect($product);
+        
+        // Удаляем товар
         $product->delete();
+        
+        // Создаем или обновляем редирект на главную страницу
+        $redirect = $this->createRedirectToHome($oldUrl);
+        
+        $message = 'Товар успешно удален';
+        if ($redirect) {
+            $message .= '. Создан редирект 301: ' . $oldUrl . ' → /';
+        }
 
         return redirect()->route('admin.products.index')
-            ->with('success', 'Товар успешно удален');
+            ->with('success', $message);
     }
 
     /**

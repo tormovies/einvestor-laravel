@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tag;
+use App\Traits\CreatesRedirectOnDelete;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class TagController extends Controller
 {
+    use CreatesRedirectOnDelete;
     /**
      * Список тегов
      */
@@ -121,9 +123,29 @@ class TagController extends Controller
     public function destroy($id)
     {
         $tag = Tag::findOrFail($id);
+        
+        // Получаем URL тега для редиректа (до удаления)
+        $oldUrl = $this->getUrlForRedirect($tag);
+        
+        // Удаляем связи тега из материалов (постов и товаров)
+        // Это происходит автоматически через onDelete('cascade') в pivot таблицах,
+        // но для надежности удаляем явно
+        $tag->posts()->detach();
+        $tag->products()->detach();
+        
+        // Удаляем тег
         $tag->delete();
+        
+        // Создаем или обновляем редирект на главную страницу
+        $redirect = $this->createRedirectToHome($oldUrl);
+        
+        $message = 'Тег успешно удален';
+        if ($redirect) {
+            $message .= '. Создан редирект 301: ' . $oldUrl . ' → /';
+        }
+        $message .= '. Все упоминания тега в материалах удалены.';
 
         return redirect()->route('admin.tags.index')
-            ->with('success', 'Тег успешно удален');
+            ->with('success', $message);
     }
 }
