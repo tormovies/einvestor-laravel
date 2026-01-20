@@ -60,15 +60,30 @@ class VerifyCsrfToken extends Middleware
         // Проверяем путь разными способами для надежности
         $path = $request->path();
         $pathInfo = trim($request->getPathInfo(), '/');
+        $fullUrl = $request->fullUrl();
+        
+        // Логируем ВСЕ запросы к robokassa для отладки
+        if (str_contains($path, 'robokassa') || str_contains($pathInfo, 'robokassa') || str_contains($fullUrl, 'robokassa')) {
+            \Illuminate\Support\Facades\Log::info('VerifyCsrfToken: Запрос к Робокассе обнаружен', [
+                'path' => $path,
+                'pathInfo' => $pathInfo,
+                'fullUrl' => $fullUrl,
+                'method' => $request->method(),
+                'uri' => $request->getRequestUri(),
+            ]);
+        }
         
         // Явно пропускаем все запросы к Робокассе без проверки CSRF
         if (str_starts_with($path, 'robokassa/') || 
             str_starts_with($pathInfo, 'robokassa/') || 
-            $request->is('robokassa/*')) {
+            $request->is('robokassa/*') ||
+            str_contains($path, 'robokassa') ||
+            str_contains($pathInfo, 'robokassa')) {
             \Illuminate\Support\Facades\Log::info('VerifyCsrfToken: handle - Пропуск CSRF для Робокассы', [
                 'path' => $path,
                 'pathInfo' => $pathInfo,
                 'method' => $request->method(),
+                'fullUrl' => $fullUrl,
             ]);
             return $next($request);
         }
@@ -76,40 +91,69 @@ class VerifyCsrfToken extends Middleware
         try {
             return parent::handle($request, $next);
         } catch (\Illuminate\Session\TokenMismatchException $e) {
-            // Если ошибка CSRF для Робокассы - выдаем отладочную информацию
+            // Если ошибка CSRF - проверяем, не для ли Робокассы
             $path = $request->path();
             $pathInfo = trim($request->getPathInfo(), '/');
+            $fullUrl = $request->fullUrl();
             
+            \Illuminate\Support\Facades\Log::error('VerifyCsrfToken: CSRF TokenMismatchException', [
+                'path' => $path,
+                'pathInfo' => $pathInfo,
+                'fullUrl' => $fullUrl,
+                'method' => $request->method(),
+            ]);
+            
+            // Проверяем все возможные варианты пути к Робокассе
             if (str_starts_with($path, 'robokassa/') || 
                 str_starts_with($pathInfo, 'robokassa/') || 
-                $request->is('robokassa/*')) {
+                $request->is('robokassa/*') ||
+                str_contains($path, 'robokassa') ||
+                str_contains($pathInfo, 'robokassa') ||
+                str_contains($fullUrl, 'robokassa')) {
                 \Illuminate\Support\Facades\Log::warning('VerifyCsrfToken: CSRF ошибка для Робокассы, возвращаем отладку', [
                     'path' => $path,
                     'pathInfo' => $pathInfo,
+                    'fullUrl' => $fullUrl,
                 ]);
                 
-                $debugInfo = [
-                    'error' => 'CSRF Token Mismatch',
-                    'path' => $path,
-                    'pathInfo' => $pathInfo,
-                    'method' => $request->method(),
-                    'url' => $request->fullUrl(),
-                    'all_params' => $request->all(),
-                    'query_params' => $request->query(),
-                    'post_params' => $request->post(),
-                    'headers' => array_map(function ($header) {
-                        return is_array($header) ? implode(', ', $header) : $header;
-                    }, $request->headers->all()),
-                    'ip' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'has_session' => $request->hasSession(),
-                    'session_id' => $request->hasSession() ? session()->getId() : null,
-                    'csrf_token' => csrf_token(),
-                    'x_csrf_token_header' => $request->header('X-CSRF-TOKEN'),
-                    'x_xsrf_token_header' => $request->header('X-XSRF-TOKEN'),
-                ];
-                
-                return response()->view('debug.robokassa', ['debug' => $debugInfo], 200);
+                try {
+                    $debugInfo = [
+                        'error' => 'CSRF Token Mismatch',
+                        'path' => $path,
+                        'pathInfo' => $pathInfo,
+                        'fullUrl' => $fullUrl,
+                        'method' => $request->method(),
+                        'uri' => $request->getRequestUri(),
+                        'all_params' => $request->all(),
+                        'query_params' => $request->query(),
+                        'post_params' => $request->post(),
+                        'headers' => array_map(function ($header) {
+                            return is_array($header) ? implode(', ', $header) : (string)$header;
+                        }, $request->headers->all()),
+                        'ip' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                        'has_session' => $request->hasSession(),
+                        'session_id' => $request->hasSession() ? (session()->getId() ?? null) : null,
+                    ];
+                    
+                    try {
+                        $debugInfo['csrf_token'] = csrf_token();
+                    } catch (\Exception $e) {
+                        $debugInfo['csrf_token'] = 'Не доступен';
+                    }
+                    
+                    $debugInfo['x_csrf_token_header'] = $request->header('X-CSRF-TOKEN');
+                    $debugInfo['x_xsrf_token_header'] = $request->header('X-XSRF-TOKEN');
+                    
+                    return response()->view('debug.robokassa', ['debug' => $debugInfo], 200);
+                } catch (\Exception $viewException) {
+                    \Illuminate\Support\Facades\Log::error('Error rendering debug view', ['error' => $viewException->getMessage()]);
+                    return response()->json([
+                        'error' => 'CSRF Token Mismatch для Робокассы',
+                        'message' => $viewException->getMessage(),
+                        'path' => $path,
+                    ], 200);
+                }
             }
             throw $e;
         }
