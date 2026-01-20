@@ -216,24 +216,49 @@ class RobokassaController extends Controller
      */
     public function fail(Request $request)
     {
-        // Отладочная информация - сначала логируем все детали
-        $debugInfo = [
-            'method' => $request->method(),
-            'path' => $request->path(),
-            'full_url' => $request->fullUrl(),
-            'all_params' => $request->all(),
-            'query_params' => $request->query(),
-            'post_params' => $request->post(),
-            'headers' => $request->headers->all(),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'has_session' => $request->hasSession(),
-            'session_id' => $request->hasSession() ? session()->getId() : null,
-        ];
+        try {
+            // Отладочная информация - сначала логируем все детали
+            $debugInfo = [
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'full_url' => $request->fullUrl(),
+                'all_params' => $request->all(),
+                'query_params' => $request->query(),
+                'post_params' => $request->post(),
+                'headers' => array_map(function ($header) {
+                    return is_array($header) ? implode(', ', $header) : (string)$header;
+                }, $request->headers->all()),
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'has_session' => $request->hasSession(),
+                'session_id' => $request->hasSession() ? (session()->getId() ?? null) : null,
+            ];
+        } catch (\Exception $e) {
+            $debugInfo = [
+                'error_creating_debug' => $e->getMessage(),
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'url' => $request->fullUrl(),
+            ];
+        }
         
         Log::info('Robokassa fail URL called', $debugInfo);
         
-        $invId = $request->input('InvId');
+        // Получаем InvId из параметров (может быть в GET или POST)
+        $invId = $request->input('InvId') 
+              ?? $request->query('InvId') 
+              ?? $request->post('InvId');
+        
+        Log::info('Robokassa fail: InvId lookup', [
+            'method' => $request->method(),
+            'invId_from_input' => $request->input('InvId'),
+            'invId_from_query' => $request->query('InvId'),
+            'invId_from_post' => $request->post('InvId'),
+            'invId_final' => $invId,
+            'all_query' => $request->query(),
+            'all_post' => $request->post(),
+            'all_params' => $request->all(),
+        ]);
         
         $order = null;
         if ($invId) {
@@ -244,6 +269,11 @@ class RobokassaController extends Controller
         // Проверяем также другие возможные параметры
         if (!$order && $request->has('OutSum')) {
             Log::warning('Robokassa fail: Order not found by InvId', $debugInfo);
+        }
+        
+        // Если нет InvId - логируем для отладки
+        if (!$invId) {
+            Log::warning('Robokassa fail: InvId not provided', $debugInfo);
         }
 
         // В режиме отладки можем показывать JSON вместо страницы
