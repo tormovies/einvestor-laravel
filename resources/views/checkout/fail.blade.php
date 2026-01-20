@@ -29,7 +29,9 @@
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                 <a href="{{ route('home') }}" class="btn">На главную</a>
                 @if($order)
-                <a href="{{ route('checkout.index') }}" class="btn" style="background: #dc2626;">Попробовать снова</a>
+                <a href="{{ route('products.index') }}" class="btn" style="background: #6b7280;">В каталог</a>
+                @else
+                <a href="{{ route('products.index') }}" class="btn" style="background: #6b7280;">В каталог</a>
                 @endif
             </div>
         </div>

@@ -93,6 +93,10 @@ class RobokassaService
      */
     public function getPaymentUrl(float $amount, int $invoiceId, string $description, array $additionalParams = []): string
     {
+        // Получаем URL из конфигурации
+        $successUrl = config('robokassa.success_url', env('APP_URL') . '/robokassa/success');
+        $failUrl = config('robokassa.fail_url', env('APP_URL') . '/robokassa/fail');
+        
         $params = array_merge([
             'MerchantLogin' => $this->merchantLogin,
             'OutSum' => number_format($amount, 2, '.', ''),
@@ -101,6 +105,8 @@ class RobokassaService
             'SignatureValue' => $this->generatePaymentSignature($amount, $invoiceId, $description),
             'IsTest' => $this->isTest ? 1 : 0,
             'Encoding' => 'utf-8',
+            'SuccessURL' => $successUrl,
+            'FailURL' => $failUrl,
         ], $additionalParams);
 
         return $this->baseUrl . '?' . http_build_query($params);
