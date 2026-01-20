@@ -6,6 +6,17 @@
 <div class="content">
     <h1>Мои файлы для скачивания</h1>
     
+    <div style="margin-top: 2rem; padding-bottom: 2rem; border-bottom: 2px solid #e5e7eb;">
+        <h2>Быстрые ссылки</h2>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+            <a href="{{ route('account.index') }}" class="btn">Главная</a>
+            <a href="{{ route('account.orders') }}" class="btn">Мои заказы</a>
+            <a href="{{ route('account.downloads') }}" class="btn" style="background: #2563eb;">Мои файлы</a>
+            <a href="{{ route('account.profile') }}" class="btn" style="background: #6b7280;">Профиль</a>
+            <a href="{{ route('products.index') }}" class="btn" style="background: #16a34a;">Перейти к товарам</a>
+        </div>
+    </div>
+    
     <div style="margin-top: 2rem;">
         @if($downloads->count() > 0)
         <table style="width: 100%; border-collapse: collapse;">

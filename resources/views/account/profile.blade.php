@@ -22,6 +22,17 @@
     </div>
     @endif
     
+    <div style="margin-top: 2rem; padding-bottom: 2rem; border-bottom: 2px solid #e5e7eb;">
+        <h2>Быстрые ссылки</h2>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+            <a href="{{ route('account.index') }}" class="btn">Главная</a>
+            <a href="{{ route('account.orders') }}" class="btn">Мои заказы</a>
+            <a href="{{ route('account.downloads') }}" class="btn">Мои файлы</a>
+            <a href="{{ route('account.profile') }}" class="btn" style="background: #2563eb;">Профиль</a>
+            <a href="{{ route('products.index') }}" class="btn" style="background: #16a34a;">Перейти к товарам</a>
+        </div>
+    </div>
+    
     <div style="max-width: 600px; margin-top: 2rem;">
         <form action="{{ route('account.profile.update') }}" method="POST">
             @csrf
