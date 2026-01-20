@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderDownload;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Services\RobokassaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
@@ -133,6 +136,25 @@ class CheckoutController extends Controller
             }
 
             DB::commit();
+
+            // Отправляем уведомление администратору о новом заказе
+            try {
+                $adminEmail = Setting::get('mail.admin_email');
+                if ($adminEmail && filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                    // Загружаем items для письма
+                    $order->load('items');
+                    Mail::to($adminEmail)->send(
+                        new \App\Mail\NewOrderNotificationMail($order)
+                    );
+                }
+            } catch (\Exception $e) {
+                // Логируем ошибку, но не прерываем процесс оформления заказа
+                Log::error('Failed to send admin notification about new order', [
+                    'order_id' => $order->id,
+                    'admin_email' => $adminEmail ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             // Очищаем корзину
             session(['cart' => []]);
