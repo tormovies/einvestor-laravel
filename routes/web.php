@@ -41,8 +41,8 @@ Route::get('/checkout/success/{orderNumber}', [CheckoutController::class, 'succe
 
 // Робокасса
 Route::post('/robokassa/result', [RobokassaController::class, 'result'])->name('robokassa.result');
-Route::get('/robokassa/success', [RobokassaController::class, 'success'])->name('robokassa.success');
-Route::get('/robokassa/fail', [RobokassaController::class, 'fail'])->name('robokassa.fail');
+Route::match(['get', 'post'], '/robokassa/success', [RobokassaController::class, 'success'])->name('robokassa.success');
+Route::match(['get', 'post'], '/robokassa/fail', [RobokassaController::class, 'fail'])->name('robokassa.fail');
 
 // Защищенные файлы (должен быть перед /{slug})
 Route::get('/download/{token}', [DownloadController::class, 'download'])->name('download');
