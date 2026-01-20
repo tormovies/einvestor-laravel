@@ -19,18 +19,21 @@ class VerifyCsrfToken extends Middleware
     ];
 
     /**
-     * Determine if the session and input CSRF tokens match.
+     * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return bool
+     * @param  \Closure  $next
+     * @return mixed
+     *
+     * @throws \Illuminate\Session\TokenMismatchException
      */
-    protected function tokensMatch($request)
+    public function handle($request, \Closure $next)
     {
-        // Если путь начинается с robokassa/, пропускаем проверку
-        if (str_starts_with($request->path(), 'robokassa/')) {
-            return true;
+        // Явно пропускаем все запросы к Робокассе без проверки CSRF
+        if ($request->is('robokassa/*')) {
+            return $next($request);
         }
 
-        return parent::tokensMatch($request);
+        return parent::handle($request, $next);
     }
 }
