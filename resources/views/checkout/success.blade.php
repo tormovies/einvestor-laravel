@@ -5,7 +5,11 @@
 @section('content')
 <div class="content">
     <div style="text-align: center; padding: 2rem 0;">
-        <h1 style="color: #16a34a; margin-bottom: 1rem;">✓ Заказ создан!</h1>
+        @if(isset($paymentSuccess) && $paymentSuccess)
+            <h1 style="color: #16a34a; margin-bottom: 1rem;">✓ Оплата успешно завершена!</h1>
+        @else
+            <h1 style="color: #16a34a; margin-bottom: 1rem;">✓ Заказ создан!</h1>
+        @endif
         
         <div style="background: #f0fdf4; border: 2px solid #16a34a; border-radius: 8px; padding: 2rem; margin: 2rem auto; max-width: 600px;">
             <h2 style="margin-bottom: 1rem;">Номер заказа: {{ $order->number }}</h2>

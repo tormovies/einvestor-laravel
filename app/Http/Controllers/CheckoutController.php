@@ -165,9 +165,13 @@ class CheckoutController extends Controller
     /**
      * Страница успешного создания заказа
      */
-    public function success($orderNumber)
+    public function success(Request $request, $orderNumber)
     {
         $order = Order::where('number', $orderNumber)->firstOrFail();
-        return view('checkout.success', compact('order'));
+        
+        // Проверяем, пришли ли мы с успешной оплаты
+        $paymentSuccess = $request->has('payment') && $request->get('payment') === 'success';
+        
+        return view('checkout.success', compact('order', 'paymentSuccess'));
     }
 }

@@ -67,17 +67,18 @@ class RobokassaController extends Controller
         $invId = $request->input('InvId');
         
         if (!$invId) {
-            return redirect()->route('home')->with('error', 'Неверные параметры оплаты');
+            return redirect()->route('home');
         }
 
         $order = Order::find($invId);
         
         if (!$order) {
-            return redirect()->route('home')->with('error', 'Заказ не найден');
+            return redirect()->route('home');
         }
 
-        return redirect()->route('checkout.success', $order->number)
-            ->with('success', 'Оплата успешно завершена!');
+        // Перенаправляем на страницу успеха с номером заказа в URL
+        // Используем query параметр вместо сессии, чтобы избежать проблем с CSRF
+        return redirect()->route('checkout.success', ['orderNumber' => $order->number, 'payment' => 'success']);
     }
 
     /**
