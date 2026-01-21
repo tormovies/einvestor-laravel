@@ -61,11 +61,18 @@ class RedirectController extends Controller
 
         // Нормализуем URL - убираем начальный слеш
         $validated['old_url'] = trim($validated['old_url'], '/');
-        $validated['new_url'] = trim($validated['new_url'], '/');
+        $newUrlTrimmed = trim($validated['new_url'], '/');
         
-        // Если new_url начинается не с /, добавляем
-        if (!empty($validated['new_url']) && !str_starts_with($validated['new_url'], '/')) {
-            $validated['new_url'] = '/' . $validated['new_url'];
+        // Если после trim получилась пустая строка, это главная страница - сохраняем '/'
+        if ($newUrlTrimmed === '') {
+            $validated['new_url'] = '/';
+        } else {
+            // Если new_url начинается не с /, добавляем
+            if (!str_starts_with($newUrlTrimmed, '/')) {
+                $validated['new_url'] = '/' . $newUrlTrimmed;
+            } else {
+                $validated['new_url'] = $newUrlTrimmed;
+            }
         }
 
         // Проверяем, что old_url не равен new_url
@@ -113,16 +120,23 @@ class RedirectController extends Controller
 
         // Нормализуем URL - убираем начальный слеш
         $validated['old_url'] = trim($validated['old_url'], '/');
-        $validated['new_url'] = trim($validated['new_url'], '/');
+        $newUrlTrimmed = trim($validated['new_url'], '/');
         
         // Сохраняем old_url как есть (без декодирования)
         // Если пользователь ввел URL-encoded версию (%d0%b8...), сохраняем её
         // Если ввел обычную версию - сохраняем обычную
         // При поиске будем проверять оба варианта
         
-        // Если new_url начинается не с /, добавляем
-        if (!empty($validated['new_url']) && !str_starts_with($validated['new_url'], '/')) {
-            $validated['new_url'] = '/' . $validated['new_url'];
+        // Если после trim получилась пустая строка, это главная страница - сохраняем '/'
+        if ($newUrlTrimmed === '') {
+            $validated['new_url'] = '/';
+        } else {
+            // Если new_url начинается не с /, добавляем
+            if (!str_starts_with($newUrlTrimmed, '/')) {
+                $validated['new_url'] = '/' . $newUrlTrimmed;
+            } else {
+                $validated['new_url'] = $newUrlTrimmed;
+            }
         }
 
         // Проверяем, что old_url не равен new_url
