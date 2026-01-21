@@ -21,32 +21,8 @@ class RedirectMiddleware
             // Также пробуем декодированную версию (на случай если Laravel уже декодировал)
             $decodedPath = trim($request->path(), '/');
             
-            // Исключаем системные пути - они обрабатываются роутингом
-            $excludedPaths = [
-                '',  // Главная страница
-                'cart',
-                'checkout',
-                'download',
-                'login',
-                'logout',
-                'account',
-                'articles',
-                'products',
-                'category',
-                'tag',
-                'admin',
-                'api',
-                'robokassa',  // Робокасса - обрабатывается отдельно
-            ];
-            
-            // Проверяем, не начинается ли путь с исключенного префикса
-            $pathParts = explode('/', $path);
-            $firstSegment = $pathParts[0] ?? '';
-            
-            if (in_array($firstSegment, $excludedPaths)) {
-                return $next($request);
-            }
-            
+            // ВАЖНО: Сначала проверяем редиректы для ВСЕХ путей
+            // Это позволяет редиректам работать даже для путей, начинающихся с articles, products и т.д.
             // Проверяем таблицу редиректов
             // Пробуем сначала с путем как есть (может быть URL-encoded)
             $redirect = Redirect::findRedirect($path);
@@ -69,6 +45,36 @@ class RedirectMiddleware
                 
                 $redirect->increment('hits');
                 return redirect($redirect->new_url, $redirect->status_code);
+            }
+            
+            // Если редирект не найден, проверяем исключения
+            // Исключаем системные пути - они обрабатываются роутингом
+            // Но только если для них нет редиректа (проверка выше)
+            $excludedPaths = [
+                '',  // Главная страница
+                'cart',
+                'checkout',
+                'download',
+                'login',
+                'logout',
+                'account',
+                'articles',
+                'products',
+                'category',
+                'tag',
+                'admin',
+                'api',
+                'robokassa',  // Робокасса - обрабатывается отдельно
+            ];
+            
+            // Проверяем, не начинается ли путь с исключенного префикса
+            $pathParts = explode('/', $path);
+            $firstSegment = $pathParts[0] ?? '';
+            
+            // Если путь начинается с исключенного префикса и редирект не найден,
+            // пропускаем его дальше в роутинг
+            if (in_array($firstSegment, $excludedPaths)) {
+                return $next($request);
             }
         }
         
