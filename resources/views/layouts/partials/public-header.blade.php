@@ -112,6 +112,106 @@
             color: #2563eb;
         }
         
+        /* Кнопка гамбургера (скрыта на десктопе) */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #333;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+        
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        
+        /* Мобильное меню */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: #fff;
+                box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+                flex-direction: column;
+                gap: 0;
+                padding: 4rem 1.5rem 2rem;
+                transition: right 0.3s ease;
+                z-index: 1000;
+                overflow-y: auto;
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .nav-links li {
+                width: 100%;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            .nav-links a {
+                display: block;
+                padding: 1rem 0;
+                font-size: 1rem;
+            }
+            
+            .nav-links form {
+                width: 100%;
+            }
+            
+            .nav-links button {
+                width: 100%;
+                text-align: left;
+                padding: 1rem 0;
+            }
+            
+            /* Overlay для закрытия меню */
+            .menu-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            }
+            
+            .menu-overlay.active {
+                display: block;
+            }
+        }
+        
         main {
             min-height: calc(100vh - 200px);
         }
@@ -266,7 +366,13 @@
                     </svg>
                     <span class="logo-text">Investor</span>
                 </a>
-                <ul class="nav-links">
+                <button class="menu-toggle" id="menuToggle" aria-label="Меню" type="button">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="menu-overlay" id="menuOverlay"></div>
+                <ul class="nav-links" id="navLinks">
                     <li><a href="{{ route('home') }}">Главная</a></li>
                     <li><a href="{{ route('articles.index') }}">Статьи</a></li>
                     <li><a href="{{ route('products.index') }}">Товары</a></li>
@@ -293,3 +399,53 @@
             </nav>
         </div>
     </header>
+    
+    <script>
+        // Адаптивное меню
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const navLinks = document.getElementById('navLinks');
+            const menuOverlay = document.getElementById('menuOverlay');
+            
+            function toggleMenu() {
+                menuToggle.classList.toggle('active');
+                navLinks.classList.toggle('active');
+                menuOverlay.classList.toggle('active');
+                document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+            }
+            
+            function closeMenu() {
+                menuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                menuOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', toggleMenu);
+            }
+            
+            if (menuOverlay) {
+                menuOverlay.addEventListener('click', closeMenu);
+            }
+            
+            // Закрытие меню при клике на ссылку (на мобильных)
+            if (navLinks) {
+                const links = navLinks.querySelectorAll('a');
+                links.forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 768) {
+                            closeMenu();
+                        }
+                    });
+                });
+            }
+            
+            // Закрытие меню при изменении размера окна (если стало больше 768px)
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    closeMenu();
+                }
+            });
+        });
+    </script>
