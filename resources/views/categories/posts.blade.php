@@ -52,4 +52,26 @@
     <p style="margin-top: 2rem;">В этой категории пока нет статей.</p>
     @endif
 </div>
+
+@push('styles')
+<style>
+@media (max-width: 768px) {
+    .content .grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .content .grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .content h1 {
+        font-size: 1.75rem;
+    }
+}
+</style>
+@endpush
 @endsection

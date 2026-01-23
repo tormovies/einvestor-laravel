@@ -34,6 +34,8 @@ class SettingsController extends Controller
             'mail_from_address' => Setting::get('mail.from_address', config('mail.from.address', '')),
             'mail_from_name' => Setting::get('mail.from_name', config('mail.from.name', '')),
             'mail_admin_email' => Setting::get('mail.admin_email', config('mail.admin_email', '')),
+            // Общие настройки
+            'show_developer_contacts' => Setting::get('general.show_developer_contacts', true),
         ];
 
         return view('admin.settings.index', compact('settings'));
@@ -71,6 +73,11 @@ class SettingsController extends Controller
             'mail_from_address' => 'nullable|email|max:255',
             'mail_from_name' => 'nullable|string|max:255',
             'mail_admin_email' => 'nullable|email|max:255',
+        ]);
+
+        // Валидация общих настроек
+        $generalValidated = $request->validate([
+            'show_developer_contacts' => 'nullable|boolean',
         ]);
 
         // Сохраняем настройки Робокассы
@@ -117,10 +124,33 @@ class SettingsController extends Controller
         Setting::set('mail.from_name', $mailValidated['mail_from_name'] ?? '', 'string', 'email', 'Имя отправителя');
         Setting::set('mail.admin_email', $mailValidated['mail_admin_email'] ?? '', 'string', 'email', 'Email администратора для уведомлений');
 
+        // Сохраняем общие настройки
+        $showDeveloperContacts = $request->has('show_developer_contacts') && $request->boolean('show_developer_contacts');
+        Setting::set('general.show_developer_contacts', $showDeveloperContacts, 'boolean', 'general', 'Отображать блок контактов разработчика');
+
         // Очищаем кэш настроек
         Setting::clearCache();
 
         return redirect()->route('admin.settings.index')
             ->with('success', 'Настройки успешно сохранены');
+    }
+
+    /**
+     * Автосохранение настройки отображения контактов разработчика
+     */
+    public function saveDeveloperContacts(Request $request)
+    {
+        $request->validate([
+            'show_developer_contacts' => 'required|boolean',
+        ]);
+
+        $showDeveloperContacts = $request->boolean('show_developer_contacts');
+        Setting::set('general.show_developer_contacts', $showDeveloperContacts, 'boolean', 'general', 'Отображать блок контактов разработчика');
+        Setting::clearCache();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Настройка сохранена'
+        ]);
     }
 }

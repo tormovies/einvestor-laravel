@@ -262,6 +262,20 @@
             margin-top: 2rem;
         }
         
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
         .card {
             background: #fff;
             border: 1px solid #e5e7eb;
@@ -384,6 +398,7 @@
                             <span style="background: #2563eb; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75rem;">{{ $cartCount }}</span>
                         @endif
                     </a></li>
+                    <li><a href="/obratnaya-svyaz">Контакты</a></li>
                     @auth
                     <li><a href="{{ route('account.index') }}">Личный кабинет</a></li>
                     <li>

@@ -29,35 +29,35 @@
         </div>
         @endif
         
-        <div style="display: flex; gap: 2rem; margin-top: 2rem;">
-            <div style="flex: 1;">
+        <div class="product-layout">
+            <div class="product-main">
                 @if($product->description)
-                <div class="product-description" style="line-height: 1.8; margin-bottom: 2rem;">
+                <div class="product-description">
                     {!! $product->description !!}
                 </div>
                 @endif
                 
-                <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                    <div class="price" style="font-size: 2rem; margin-bottom: 1rem;">
+                <div class="product-purchase-box">
+                    <div class="product-price-large">
                         {{ number_format($product->price, 0, ',', ' ') }} ₽
                     </div>
                     
                     @if($product->isInStock())
-                    <form action="{{ route('cart.add', $product->id) }}" method="POST" style="margin-top: 1rem;">
+                    <form action="{{ route('cart.add', $product->id) }}" method="POST" class="product-add-form">
                         @csrf
                         <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="btn">Добавить в корзину</button>
+                        <button type="submit" class="btn btn-add-cart">Добавить в корзину</button>
                     </form>
                     @else
-                    <p style="color: red; margin-top: 1rem;">Товар временно недоступен</p>
+                    <p class="product-out-of-stock">Товар временно недоступен</p>
                     @endif
                 </div>
                 
                 @if($product->categories->count() > 0)
-                <div style="margin-top: 2rem;">
+                <div class="product-categories">
                     <strong>Категории:</strong>
                     @foreach($product->categories as $category)
-                    <a href="{{ route('category.show', $category->slug) }}" style="margin-left: 0.5rem;">{{ $category->name }}</a>@if(!$loop->last), @endif
+                    <a href="{{ route('category.show', $category->slug) }}" class="product-category-link">{{ $category->name }}</a>@if(!$loop->last), @endif
                     @endforeach
                 </div>
                 @endif
@@ -84,6 +84,79 @@
 
 @push('styles')
 <style>
+    /* Layout для страницы товара */
+    .product-layout {
+        display: flex;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .product-main {
+        flex: 1;
+    }
+    
+    .product-description {
+        line-height: 1.8;
+        margin-bottom: 2rem;
+    }
+    
+    .product-purchase-box {
+        background: #f9fafb;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    
+    .product-price-large {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2563eb;
+        margin-bottom: 1rem;
+    }
+    
+    .product-add-form {
+        margin-top: 1rem;
+    }
+    
+    .btn-add-cart {
+        background: #2563eb;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s;
+        width: 100%;
+    }
+    
+    .btn-add-cart:hover {
+        background: #1d4ed8;
+    }
+    
+    .product-out-of-stock {
+        color: red;
+        margin-top: 1rem;
+        font-weight: 500;
+    }
+    
+    .product-categories {
+        margin-top: 2rem;
+        color: #6b7280;
+    }
+    
+    .product-category-link {
+        margin-left: 0.5rem;
+        color: #2563eb;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .product-category-link:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+    }
+    
     /* Стили для изображений в описании товара */
     .product-description img {
         max-width: 100%;
@@ -277,6 +350,22 @@
     }
     
     @media (max-width: 768px) {
+        .product-layout {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .product-purchase-box {
+            order: -1;
+            position: sticky;
+            top: 20px;
+            z-index: 10;
+        }
+        
+        .product-price-large {
+            font-size: 1.75rem;
+        }
+        
         .lightbox-nav {
             width: 40px;
             height: 40px;
@@ -293,6 +382,22 @@
         
         .product-description img {
             max-width: 100%;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .product-purchase-box {
+            padding: 1rem;
+            position: static;
+        }
+        
+        .product-price-large {
+            font-size: 1.5rem;
+        }
+        
+        .btn-add-cart {
+            padding: 0.625rem 1rem;
+            font-size: 0.9375rem;
         }
     }
 </style>

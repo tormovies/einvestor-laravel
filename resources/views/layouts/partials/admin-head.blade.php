@@ -142,3 +142,34 @@
     @stack('styles')
 </head>
 <body>
+    <header style="background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 0; margin-bottom: 2rem;">
+        <div class="container">
+            <nav style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="{{ route('home') }}" class="logo" style="display: flex; align-items: center; gap: 0.25rem; text-decoration: none; font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; transition: transform 0.3s ease;">
+                    <svg class="logo-icon" viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 50px; height: 50px; flex-shrink: 0;">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M5 32 L12 24 L20 26 L28 14 L36 18 L44 10" stroke="url(#logoGradient)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <circle cx="5" cy="32" r="3.5" fill="url(#logoGradient)"/>
+                        <circle cx="44" cy="10" r="3.5" fill="url(#logoGradient)"/>
+                        <path d="M52 8 L52 32 M52 8 L70 8 M52 20 L66 20 M52 32 L70 32" stroke="url(#logoGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.02em;">Investor</span>
+                </a>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <a href="{{ route('home') }}" style="color: #333; text-decoration: none; font-weight: 500; transition: color 0.3s;" onmouseover="this.style.color='#2563eb'" onmouseout="this.style.color='#333'">На сайт</a>
+                    @auth
+                    <span style="color: #6b7280;">{{ Auth::user()->email }}</span>
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" style="background: #dc2626; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 500; transition: background 0.3s;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">Выход</button>
+                    </form>
+                    @endauth
+                </div>
+            </nav>
+        </div>
+    </header>

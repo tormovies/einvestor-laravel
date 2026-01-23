@@ -1,3 +1,8 @@
+@php
+    $showDeveloperContacts = \App\Models\Setting::get('general.show_developer_contacts', true);
+@endphp
+
+@if($showDeveloperContacts)
 <div class="developer-contacts">
     <div class="developer-contacts-card">
         <div class="developer-contacts-header">
@@ -205,12 +210,19 @@
         position: relative;
         top: 0;
         right: 0;
-        margin-bottom: 20px;
+        left: 0;
+        margin: 0 0 20px 0;
+        width: 100%;
+        max-width: 100%;
     }
     
     .developer-contacts-card {
         width: 100%;
         min-width: auto;
+        max-width: 100%;
+        margin: 0 auto;
+        border-radius: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     .developer-contacts-links {
@@ -273,3 +285,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+@endif

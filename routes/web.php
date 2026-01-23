@@ -113,6 +113,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Настройки магазина
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingsController::class, 'store'])->name('settings.store');
+    Route::post('/settings/developer-contacts', [AdminSettingsController::class, 'saveDeveloperContacts'])->name('settings.saveDeveloperContacts');
 });
 
 // Страницы (должен быть последним, так как перехватывает любые другие пути)

@@ -169,6 +169,12 @@
             border: 1px solid #10b981;
         }
 
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #dc2626;
+        }
+
         @media (max-width: 767px) {
             .settings-form {
                 padding: 1rem;
@@ -257,6 +263,25 @@
         </div>
 
         <div class="settings-section">
+            <h2>Общие настройки</h2>
+            
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label class="toggle-wrapper">
+                        <span style="font-weight: 500; color: #374151; font-size: 0.875rem;">Отображать блок контактов разработчика</span>
+                        <div class="toggle-switch {{ old('show_developer_contacts', $settings['show_developer_contacts']) ? 'active' : '' }}" 
+                             id="show_developer_contacts_toggle"
+                             onclick="toggleDeveloperContacts(this)">
+                            <input type="hidden" name="show_developer_contacts" id="show_developer_contacts" value="{{ old('show_developer_contacts', $settings['show_developer_contacts'] ? '1' : '0') }}">
+                        </div>
+                    </label>
+                    <span class="help-text">Включите для отображения блока контактов разработчика на всех публичных страницах</span>
+                    @error('show_developer_contacts') <span class="error">{{ $message }}</span> @enderror
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
             <h2>Настройки почты (SMTP)</h2>
             
             <div class="form-grid">
@@ -339,4 +364,98 @@
         </div>
     </form>
 </div>
+
+<script>
+// Автосохранение настройки отображения контактов разработчика
+function toggleDeveloperContacts(element) {
+    const isActive = element.classList.contains('active');
+    const newValue = isActive ? '0' : '1';
+    
+    // Обновляем визуальное состояние
+    if (isActive) {
+        element.classList.remove('active');
+    } else {
+        element.classList.add('active');
+    }
+    
+    // Обновляем скрытое поле
+    document.getElementById('show_developer_contacts').value = newValue;
+    
+    // Сохраняем через AJAX
+    const formData = new FormData();
+    formData.append('show_developer_contacts', newValue);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+    
+    fetch('{{ route("admin.settings.saveDeveloperContacts") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Показываем уведомление об успешном сохранении
+            showNotification('Настройка сохранена', 'success');
+        } else {
+            // Откатываем изменение при ошибке
+            if (isActive) {
+                element.classList.add('active');
+            } else {
+                element.classList.remove('active');
+            }
+            document.getElementById('show_developer_contacts').value = isActive ? '1' : '0';
+            showNotification('Ошибка при сохранении', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Откатываем изменение при ошибке
+        if (isActive) {
+            element.classList.add('active');
+        } else {
+            element.classList.remove('active');
+        }
+        document.getElementById('show_developer_contacts').value = isActive ? '1' : '0';
+        showNotification('Ошибка при сохранении', 'error');
+    });
+}
+
+// Функция для показа уведомлений
+function showNotification(message, type) {
+    // Удаляем предыдущее уведомление, если есть
+    const existingNotification = document.querySelector('.auto-save-notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Создаем новое уведомление
+    const notification = document.createElement('div');
+    notification.className = `auto-save-notification alert alert-${type === 'success' ? 'success' : 'error'}`;
+    notification.textContent = message;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '250px';
+    notification.style.opacity = '0';
+    notification.style.transition = 'opacity 0.3s';
+    
+    document.body.appendChild(notification);
+    
+    // Показываем уведомление
+    setTimeout(() => {
+        notification.style.opacity = '1';
+    }, 10);
+    
+    // Скрываем уведомление через 3 секунды
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+</script>
 @endsection
