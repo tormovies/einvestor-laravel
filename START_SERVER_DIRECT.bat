@@ -4,4 +4,4 @@ echo Запуск Laravel сервера напрямую через PHP...
 echo URL: http://localhost:8000
 echo Для остановки нажмите Ctrl+C
 echo.
-php -S localhost:8000
+php -S 127.0.0.1:8000

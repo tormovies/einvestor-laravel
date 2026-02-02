@@ -466,9 +466,9 @@
     </form>
 </div>
 
-<!-- Quill.js для визуального редактора -->
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<!-- Quill.js для визуального редактора (локально, без CDN) -->
+<link href="{{ asset('vendor/quill/quill.snow.css') }}" rel="stylesheet">
+<script src="{{ asset('vendor/quill/quill.js') }}"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
