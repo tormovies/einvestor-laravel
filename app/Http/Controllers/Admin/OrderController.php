@@ -69,4 +69,27 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.show', $order->id)
             ->with('success', 'Статус заказа обновлен');
     }
+
+    /**
+     * Подтвердить оплату вручную (если webhook не сработал).
+     * Меняет payment_status на paid → срабатывает отправка пароля на email из Order::updating.
+     */
+    public function confirmPayment($id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($order->payment_status === 'paid') {
+            return redirect()->route('admin.orders.show', $order->id)
+                ->with('info', 'Заказ уже помечен как оплаченный.');
+        }
+
+        $order->update([
+            'payment_status' => 'paid',
+            'status' => 'processing',
+            'payment_id' => $order->payment_id ?: 'manual',
+        ]);
+
+        return redirect()->route('admin.orders.show', $order->id)
+            ->with('success', 'Оплата подтверждена. Пароль для входа отправлен на email заказчика.');
+    }
 }

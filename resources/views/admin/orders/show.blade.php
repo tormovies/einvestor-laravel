@@ -12,6 +12,11 @@
         {{ session('success') }}
     </div>
     @endif
+    @if(session('info'))
+    <div style="background: #dbeafe; color: #1e40af; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+        {{ session('info') }}
+    </div>
+    @endif
     
     <div style="margin-top: 2rem; display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
         <div>
@@ -84,6 +89,14 @@
                     <div style="font-size: 0.875rem; color: #92400e; margin-top: 0.5rem;">
                         Статус оплаты обновляется автоматически через webhook от Робокассы
                     </div>
+                    @if($order->payment_status === 'pending')
+                    <form action="{{ route('admin.orders.confirmPayment', $order->id) }}" method="POST" style="margin-top: 1rem;" onsubmit="return confirm('Подтвердить оплату вручную? На email заказчика будет отправлен пароль для входа.');">
+                        @csrf
+                        <button type="submit" style="width: 100%; padding: 0.75rem; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                            Подтвердить оплату вручную и отправить пароль
+                        </button>
+                    </form>
+                    @endif
                 </div>
             </div>
         </div>
