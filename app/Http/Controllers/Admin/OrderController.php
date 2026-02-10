@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -88,6 +89,11 @@ class OrderController extends Controller
             'status' => 'processing',
             'payment_id' => $order->payment_id ?: 'manual',
         ]);
+
+        $telegram = app(TelegramNotificationService::class);
+        if ($telegram->isConfigured()) {
+            $telegram->notifyOrderPaid($order);
+        }
 
         return redirect()->route('admin.orders.show', $order->id)
             ->with('success', 'Оплата подтверждена. Пароль для входа отправлен на email заказчика.');

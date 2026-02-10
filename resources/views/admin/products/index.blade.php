@@ -33,23 +33,23 @@
     </div>
     
     @if($products->count() > 0)
-    <table style="width: 100%; border-collapse: collapse;">
+    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
         <thead>
             <tr style="border-bottom: 2px solid #e5e7eb; background: #f9fafb;">
-                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Название</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem; width: 35%; max-width: 420px;">Название</th>
                 <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">SKU</th>
                 <th style="text-align: right; padding: 0.5rem; font-size: 0.875rem;">Цена</th>
                 <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Файл</th>
                 <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Статус</th>
                 <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Наличие</th>
-                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Дата</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Обновлён</th>
                 <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Действия</th>
             </tr>
         </thead>
         <tbody>
             @foreach($products as $product)
             <tr style="border-bottom: 1px solid #e5e7eb;">
-                <td style="padding: 0.5rem; font-size: 0.875rem; font-weight: 500;">
+                <td style="padding: 0.5rem; font-size: 0.875rem; font-weight: 500; width: 35%; max-width: 420px; word-wrap: break-word; overflow-wrap: break-word;">
                     <a href="{{ route('products.show', $product->slug) }}" 
                        target="_blank" 
                        rel="noopener noreferrer"
@@ -60,8 +60,8 @@
                 <td style="padding: 0.5rem; font-size: 0.875rem;">{{ $product->sku ?: '-' }}</td>
                 <td style="padding: 0.5rem; text-align: right; font-size: 0.875rem;">{{ number_format($product->price, 0, ',', ' ') }} ₽</td>
                 <td style="padding: 0.5rem; text-align: center;">
-                    @if($product->file_path)
-                    <span style="font-size: 1.25rem;" title="Есть файл для скачивания">📦</span>
+                    @if($product->files->isNotEmpty())
+                    <span style="font-size: 1.25rem;" title="Есть файл(ы) для скачивания ({{ $product->files->count() }})">📦</span>
                     @else
                     <span style="color: #9ca3af;" title="Нет файла">-</span>
                     @endif
@@ -80,7 +80,7 @@
                     <span style="color: #dc2626;" title="Нет в наличии">✗</span>
                     @endif
                 </td>
-                <td style="padding: 0.5rem; font-size: 0.875rem;">{{ $product->created_at->format('d.m.Y') }}</td>
+                <td style="padding: 0.5rem; font-size: 0.875rem;">{{ $product->updated_at->format('d.m.Y') }}</td>
                 <td style="padding: 0.5rem; text-align: center;">
                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
                         <a href="{{ route('admin.products.edit', $product->id) }}" 

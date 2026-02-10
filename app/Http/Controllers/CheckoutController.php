@@ -7,6 +7,7 @@ use App\Models\OrderDownload;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Services\RobokassaService;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -154,6 +155,12 @@ class CheckoutController extends Controller
                     'admin_email' => $adminEmail ?? null,
                     'error' => $e->getMessage(),
                 ]);
+            }
+
+            // Уведомление в Telegram о новом заказе (если настроено)
+            $telegram = app(TelegramNotificationService::class);
+            if ($telegram->isConfigured()) {
+                $telegram->notifyNewOrder($order);
             }
 
             // Очищаем корзину

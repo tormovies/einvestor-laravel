@@ -39,6 +39,9 @@
                         @if($download->productFile)
                             <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">
                                 📄 {{ $download->productFile->file_name }}
+                                @if($download->productFile->version)
+                                    <span style="color: #4b5563;">({{ $download->productFile->version }})</span>
+                                @endif
                             </div>
                         @endif
                         @elseif($download->orderItem)

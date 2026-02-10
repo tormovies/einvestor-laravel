@@ -21,7 +21,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with('categories', 'featuredImage')
+        $query = Product::with('categories', 'featuredImage', 'files')
             ->orderBy('created_at', 'desc');
 
         // Фильтрация по статусу
@@ -180,6 +180,7 @@ class ProductController extends Controller
         // Загрузка нескольких файлов
         if ($request->hasFile('files')) {
             $order = $product->files()->max('order') ?? 0;
+            $version = $request->filled('file_version_new') ? mb_substr(trim($request->input('file_version_new')), 0, 100) : null;
             foreach ($request->file('files') as $file) {
                 $path = $file->store('products', 'local');
                 ProductFile::create([
@@ -189,6 +190,7 @@ class ProductController extends Controller
                     'file_size' => $file->getSize(),
                     'mime_type' => $file->getMimeType(),
                     'order' => ++$order,
+                    'version' => $version,
                 ]);
             }
         }
@@ -398,9 +400,21 @@ class ProductController extends Controller
             }
         }
 
+        // Обновление версий у существующих файлов
+        $fileVersions = $request->input('file_versions', []);
+        if (is_array($fileVersions)) {
+            foreach ($fileVersions as $fileId => $version) {
+                if (is_numeric($fileId)) {
+                    $v = $version !== null && $version !== '' ? mb_substr(trim((string) $version), 0, 100) : null;
+                    ProductFile::where('id', $fileId)->where('product_id', $product->id)->update(['version' => $v]);
+                }
+            }
+        }
+
         // Загрузка новых файлов (обрабатываем ДО обновления товара)
         if ($request->hasFile('files')) {
             $order = $product->files()->max('order') ?? 0;
+            $version = $request->filled('file_version_new') ? mb_substr(trim($request->input('file_version_new')), 0, 100) : null;
             foreach ($request->file('files') as $file) {
                 $path = $file->store('products', 'local');
                 ProductFile::create([
@@ -410,6 +424,7 @@ class ProductController extends Controller
                     'file_size' => $file->getSize(),
                     'mime_type' => $file->getMimeType(),
                     'order' => ++$order,
+                    'version' => $version,
                 ]);
             }
         }

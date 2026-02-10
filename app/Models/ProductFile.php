@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProductFile extends Model
 {
     protected $fillable = [
-        'product_id', 'file_path', 'file_name', 'file_size', 'mime_type', 'order'
+        'product_id', 'file_path', 'file_name', 'file_size', 'mime_type', 'order', 'version'
     ];
 
     protected $casts = [

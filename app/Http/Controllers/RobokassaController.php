@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Services\RobokassaService;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -49,6 +50,11 @@ class RobokassaController extends Controller
             'status' => 'processing',
             'payment_id' => $request->input('PaymentMethod') ?? 'robokassa',
         ]);
+
+        $telegram = app(TelegramNotificationService::class);
+        if ($telegram->isConfigured()) {
+            $telegram->notifyOrderPaid($order);
+        }
 
         Log::info('Robokassa: Order payment confirmed', [
             'order_id' => $order->id,
@@ -196,6 +202,10 @@ class RobokassaController extends Controller
                     'status' => 'processing',
                     'payment_id' => 'robokassa',
                 ]);
+                $telegram = app(TelegramNotificationService::class);
+                if ($telegram->isConfigured()) {
+                    $telegram->notifyOrderPaid($order);
+                }
             } else {
                 Log::warning('Robokassa success: Invalid signature', [
                     'order_id' => $order->id,

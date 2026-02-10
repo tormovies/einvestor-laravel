@@ -482,13 +482,16 @@
                 <div style="background: #f9fafb; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
                     <strong style="display: block; margin-bottom: 0.5rem;">Загруженные файлы:</strong>
                     @foreach($product->files as $file)
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: white; border-radius: 4px; margin-bottom: 0.25rem; border: 1px solid #e5e7eb;">
-                            <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.5rem; background: white; border-radius: 4px; margin-bottom: 0.25rem; border: 1px solid #e5e7eb; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
                                 <strong>{{ $file->file_name }}</strong>
                                 @if($file->file_size)
                                     <span style="color: #6b7280; font-size: 0.875rem;">({{ $file->formatted_size }})</span>
                                 @endif
                             </div>
+                            <input type="text" name="file_versions[{{ $file->id }}]" value="{{ old('file_versions.'.$file->id, $file->version) }}" 
+                                   placeholder="Версия" maxlength="100"
+                                   style="width: 120px; padding: 0.35rem 0.5rem; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 0.875rem;">
                             <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin: 0;">
                                 <input type="checkbox" name="delete_files[]" value="{{ $file->id }}" 
                                        style="width: 1.25rem; height: 1.25rem;">
@@ -503,6 +506,12 @@
             <div style="margin-bottom: 0.5rem;">
                 <input type="file" name="files[]" id="files" multiple accept=".zip,.rar,.exe,.dll,.mq4,.mq5,.txt,.doc,.pdf">
                 <span class="help-text">Можно выбрать несколько файлов. Максимум 10MB каждый</span>
+            </div>
+            <div style="margin-top: 0.5rem;">
+                <label for="file_version_new" style="display: block; margin-bottom: 0.25rem; font-size: 0.875rem;">Версия (для всех новых файлов)</label>
+                <input type="text" name="file_version_new" id="file_version_new" value="{{ old('file_version_new') }}" 
+                       placeholder="Например: 1.0, 2024.02" maxlength="100"
+                       style="width: 100%; max-width: 280px; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 4px;">
             </div>
             
             @error('files.*') <span class="error">{{ $message }}</span> @enderror
