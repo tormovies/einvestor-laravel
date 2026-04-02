@@ -253,10 +253,25 @@
                 @error('parent_id') <span class="error">{{ $message }}</span> @enderror
             </div>
             
+            @php
+                $isSystemPageForMenu = in_array($page->slug, ['_home', '_products_list', '_articles_list']);
+            @endphp
+            <div class="form-group full-width">
+                @if($isSystemPageForMenu)
+                    <span class="help-text">Системные страницы не выводятся в шапке.</span>
+                @else
+                    <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-weight: 500; cursor: pointer;">
+                        <input type="checkbox" name="show_in_menu" value="1" {{ old('show_in_menu', $page->show_in_menu ?? false) ? 'checked' : '' }} style="width: auto; margin-top: 0.2rem;">
+                        <span>Показывать в шапке сайта</span>
+                    </label>
+                    <span class="help-text">Пункт появится в главном меню (только при статусе «Опубликовано»).</span>
+                @endif
+            </div>
+
             <div class="form-group">
                 <label for="menu_order">Порядок в меню</label>
                 <input type="number" name="menu_order" id="menu_order" value="{{ old('menu_order', $page->menu_order ?? 0) }}" min="0">
-                <span class="help-text">Меньшее число = выше в меню (0 по умолчанию)</span>
+                <span class="help-text">Меньшее число = выше среди пунктов из страниц.</span>
                 @error('menu_order') <span class="error">{{ $message }}</span> @enderror
             </div>
             

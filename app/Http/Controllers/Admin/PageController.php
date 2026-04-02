@@ -12,6 +12,24 @@ class PageController extends Controller
 {
     use CreatesRedirectOnDelete;
     /**
+     * Переключить вывод страницы в шапке сайта (из списка страниц)
+     */
+    public function toggleShowInMenu(Page $page): \Illuminate\Http\RedirectResponse
+    {
+        $systemPages = ['_home', '_products_list', '_articles_list'];
+        if (in_array($page->slug, $systemPages, true)) {
+            return redirect()->back()->with('error', 'Системные страницы нельзя выводить в шапке.');
+        }
+
+        $page->show_in_menu = ! $page->show_in_menu;
+        $page->save();
+
+        return redirect()->back()->with('success', $page->show_in_menu
+            ? 'Страница будет показана в шапке.'
+            : 'Страница скрыта из шапки.');
+    }
+
+    /**
      * Список страниц
      */
     public function index(Request $request)
@@ -58,6 +76,7 @@ class PageController extends Controller
             'status' => 'required|in:publish,draft,private',
             'parent_id' => 'nullable|exists:pages,id',
             'menu_order' => 'nullable|integer|min:0',
+            'show_in_menu' => 'sometimes|boolean',
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string|max:320',
             'seo_h1' => 'nullable|string|max:255',
@@ -86,6 +105,8 @@ class PageController extends Controller
         if (!isset($validated['menu_order'])) {
             $validated['menu_order'] = 0;
         }
+
+        $validated['show_in_menu'] = $request->boolean('show_in_menu');
 
         // Обеспечиваем, что content не будет null (для NOT NULL ограничения)
         if (!isset($validated['content']) || $validated['content'] === null) {
@@ -134,6 +155,7 @@ class PageController extends Controller
             'status' => 'required|in:publish,draft,private',
             'parent_id' => 'nullable|exists:pages,id',
             'menu_order' => 'nullable|integer|min:0',
+            'show_in_menu' => 'sometimes|boolean',
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string|max:320',
             'seo_h1' => 'nullable|string|max:255',
@@ -162,6 +184,8 @@ class PageController extends Controller
         if (!isset($validated['menu_order'])) {
             $validated['menu_order'] = 0;
         }
+
+        $validated['show_in_menu'] = $isSystemPage ? false : $request->boolean('show_in_menu');
 
         // Обеспечиваем, что content не будет null (для NOT NULL ограничения)
         if (!isset($validated['content']) || $validated['content'] === null) {

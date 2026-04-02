@@ -15,6 +15,11 @@
         {{ session('success') }}
     </div>
     @endif
+    @if(session('error'))
+    <div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+        {{ session('error') }}
+    </div>
+    @endif
     
     <div style="margin-bottom: 2rem;">
         <form method="GET" action="{{ route('admin.pages.index') }}" style="display: flex; gap: 1rem; flex-wrap: wrap;">
@@ -40,7 +45,8 @@
                 <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Название</th>
                 <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Slug</th>
                 <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Статус</th>
-                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Родительская страница</th>
+                <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;" title="Выводить в шапке сайта">Шапка</th>
+                <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;" title="Родительская страница">РодСтр</th>
                 <th style="text-align: left; padding: 0.5rem; font-size: 0.875rem;">Дата</th>
                 <th style="text-align: center; padding: 0.5rem; font-size: 0.875rem;">Действия</th>
             </tr>
@@ -89,6 +95,24 @@
                     <span style="font-size: 1.25rem;" title="Черновик">❌</span>
                     @else
                     <span style="font-size: 1.25rem;" title="Приватная">🔒</span>
+                    @endif
+                </td>
+                <td style="padding: 0.5rem; text-align: center;">
+                    @if($isSystemPage)
+                    <span style="font-size: 1.25rem; opacity: 0.35; cursor: default;" title="Системная страница — не выводится в шапке">—</span>
+                    @else
+                    <form action="{{ route('admin.pages.toggleMenu', $page->id) }}" method="POST" style="display: inline; margin: 0;">
+                        @csrf
+                        <button type="submit"
+                                style="font-size: 1.25rem; background: none; border: none; cursor: pointer; padding: 0; line-height: 1;"
+                                title="{{ $page->show_in_menu ? 'Сейчас выводится в шапке. Нажмите, чтобы скрыть.' : 'Сейчас не в шапке. Нажмите, чтобы показать.' }}">
+                            @if($page->show_in_menu)
+                            <span aria-label="Выводится в шапке">✅</span>
+                            @else
+                            <span aria-label="Не выводится в шапке">❌</span>
+                            @endif
+                        </button>
+                    </form>
                     @endif
                 </td>
                 <td style="padding: 0.5rem; font-size: 0.875rem;">

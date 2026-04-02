@@ -161,6 +161,8 @@ class CheckoutController extends Controller
             $telegram = app(TelegramNotificationService::class);
             if ($telegram->isConfigured()) {
                 $telegram->notifyNewOrder($order);
+            } else {
+                Log::debug('Telegram: не отправлено (нет TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID в .env)', ['order_id' => $order->id]);
             }
 
             // Очищаем корзину

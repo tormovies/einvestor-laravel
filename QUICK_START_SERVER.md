@@ -9,7 +9,7 @@
 ## ✅ Запуск (один шаг)
 
 ```bash
-cd c:\projects\einvestor-laravel\public && php -S 127.0.0.1:8000
+cd c:\projects\einvestor-laravel\public && php -S 127.0.0.1:3000
 ```
 
 Или дважды кликните: **`START_SERVER_DIRECT.bat`**
@@ -18,7 +18,7 @@ cd c:\projects\einvestor-laravel\public && php -S 127.0.0.1:8000
 
 ## 🌐 URL
 
-**http://localhost:8000**
+**http://localhost:3000**
 
 ---
 

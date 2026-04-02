@@ -96,6 +96,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('posts', AdminPostController::class);
     
     // Страницы
+    Route::post('/pages/{page}/toggle-menu', [AdminPageController::class, 'toggleShowInMenu'])->name('pages.toggleMenu');
     Route::resource('pages', AdminPageController::class);
     
     // Категории

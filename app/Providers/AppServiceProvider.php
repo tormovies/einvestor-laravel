@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Page;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -74,5 +76,19 @@ class AppServiceProvider extends ServiceProvider
                 // В этом случае будут использоваться настройки из .env
             }
         }
+
+        View::composer('layouts.partials.public-header', function ($view) {
+            $headerMenuPages = collect();
+            if (Schema::hasTable('pages') && Schema::hasColumn('pages', 'show_in_menu')) {
+                $headerMenuPages = Page::query()
+                    ->where('status', 'publish')
+                    ->where('show_in_menu', true)
+                    ->whereNotIn('slug', ['_home', '_products_list', '_articles_list'])
+                    ->orderBy('menu_order')
+                    ->orderBy('title')
+                    ->get(['slug', 'title']);
+            }
+            $view->with('headerMenuPages', $headerMenuPages);
+        });
     }
 }

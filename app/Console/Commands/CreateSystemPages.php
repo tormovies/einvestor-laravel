@@ -72,6 +72,7 @@ class CreateSystemPages extends Command
                 'status' => 'publish',
                 'parent_id' => null,
                 'menu_order' => 0,
+                'show_in_menu' => false,
                 'author_id' => $authorId,
                 'featured_image_id' => null,
                 'published_at' => now(),

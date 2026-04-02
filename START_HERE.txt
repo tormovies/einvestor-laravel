@@ -12,11 +12,11 @@
 
 2. Откройте PowerShell/CMD и выполните:
    cd c:\projects\einvestor-laravel\public
-   php -S 127.0.0.1:8000
+   php -S 127.0.0.1:3000
 
 ═══════════════════════════════════════════════════════════════
 
-🌐 URL: http://localhost:8000
+🌐 URL: http://localhost:3000
 
 ⏹️  Остановка: Ctrl+C в терминале
 

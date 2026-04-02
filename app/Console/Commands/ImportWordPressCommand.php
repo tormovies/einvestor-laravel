@@ -258,6 +258,7 @@ class ImportWordPressCommand extends Command
                     'status' => $page['status'] ?? 'publish',
                     'parent_id' => null, // TODO: обработать parent
                     'menu_order' => $page['menu_order'] ?? 0,
+                    'show_in_menu' => false,
                     'author_id' => $this->defaultUserId,
                     'featured_image_id' => $this->getMediaId($page['featured_image'] ?? null),
                     'published_at' => $page['date'] ?? now(),

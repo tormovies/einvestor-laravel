@@ -388,8 +388,10 @@
                 <div class="menu-overlay" id="menuOverlay"></div>
                 <ul class="nav-links" id="navLinks">
                     <li><a href="{{ route('home') }}">Главная</a></li>
-                    <li><a href="{{ route('articles.index') }}">Статьи</a></li>
                     <li><a href="{{ route('products.index') }}">Товары</a></li>
+                    @foreach($headerMenuPages ?? [] as $navPage)
+                    <li><a href="{{ route('pages.show', $navPage->slug) }}">{{ $navPage->title }}</a></li>
+                    @endforeach
                     <li><a href="{{ route('cart.index') }}">Корзина 
                         @php
                             $cartCount = \App\Http\Controllers\CartController::getCartCount();
@@ -399,6 +401,7 @@
                         @endif
                     </a></li>
                     <li><a href="/obratnaya-svyaz">Контакты</a></li>
+                    <li><a href="{{ route('articles.index') }}">Статьи</a></li>
                     @auth
                     <li><a href="{{ route('account.index') }}">Личный кабинет</a></li>
                     <li>

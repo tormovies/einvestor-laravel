@@ -13,13 +13,14 @@ class Page extends Model
 
     protected $fillable = [
         'wp_id', 'slug', 'title', 'content', 'excerpt',
-        'status', 'parent_id', 'menu_order', 'author_id',
+        'status', 'parent_id', 'menu_order', 'show_in_menu', 'author_id',
         'featured_image_id', 'published_at',
         'seo_title', 'seo_description', 'seo_h1', 'seo_intro_text'
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
+        'show_in_menu' => 'boolean',
     ];
 
     public function parent(): BelongsTo
