@@ -15,9 +15,15 @@
         </div>
         <div class="developer-contacts-content" id="developer-contacts-content">
             <div class="developer-contacts-notice">
-                Сайт сейчас находится в разработке, по любым вопросам - пишите по контактам ниже.
+                По любым вопросам - пишите по контактам ниже.
             </div>
             <div class="developer-contacts-links">
+            <a href="https://vk.com/juriyizyumov" target="_blank" rel="noopener" class="developer-contact-link" title="ВКонтакте">
+                <svg class="developer-contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.785 16.241s.287-.033.434-.2c.135-.15.132-.433.132-.433s-.02-1.305.58-1.498c.592-.19 1.35.95 2.156 1.37.605.315 1.064.245 1.064.245l2.15-.03s1.125-.067.59-.96c-.044-.07-.31-.68-1.61-1.92-1.36-1.31-1.18-.55.46-1.68 1.01-.88 1.41-1.42 1.28-1.65-.12-.22-.86-.16-.86-.16l-2.22.014s-.164-.023-.285.05c-.12.07-.196.23-.196.23s-.35.94-.81 1.74c-.98 1.64-1.37 1.73-1.53 1.63-.37-.2-.28-.8-.28-1.23 0-1.34.21-1.9-.41-2.04-.21-.05-.37-.08-.91-.09-.7-.01-1.29 0-1.62.17-.22.11-.39.36-.29.37.13.02.42.08.57.29.2.27.19.87.19.87s.11 1.63-.26 1.83c-.26.13-.61-.14-1.37-1.63-.39-.75-.68-1.58-.68-1.58s-.06-.15-.16-.23c-.12-.09-.29-.06-.29-.06l-2.11.027s-.32.01-.44.15c-.1.12-.01.37-.01.37s1.68 3.95 3.57 5.94c1.74 1.8 3.72 1.68 3.72 1.68h.88z"/>
+                </svg>
+                <span>ВКонтакте</span>
+            </a>
             <a href="https://t.me/juriyizyumov" target="_blank" rel="noopener" class="developer-contact-link" title="Telegram">
                 <svg class="developer-contact-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.193c.178 1.948.94 6.678.94 6.678s.57 1.82-.416 2.202c-.985.38-2.456-.64-2.708-.7-.252-.06-4.35 2.9-5.45 3.6-.55.35-1.12.52-1.12.52s-1.05.07-1.5-1.05c-.45-1.12-.9-2.25-1.35-3.38-.45-1.13-3.15-9.45-3.15-9.45s-.21-.63.15-1.05c.36-.42 1.05-.42 1.05-.42l12.6 4.8s.84.27.84.9c0 .63-.84.84-.84.84l-5.4 1.8-2.7.9s-.42.15-.42.6c0 .45.42.6.42.6l2.7.9 5.4 1.8s.84.21.84.84c0 .63-.84.9-.84.9l-12.6 4.8s-.69 0-1.05-.42c-.36-.42-.15-1.05-.15-1.05s.9-2.25 1.35-3.38c.45-1.13.9-2.25 1.35-3.38.45-1.12 1.5-1.05 1.5-1.05s.57.07 1.12.52c.55.45 5.45 3.6 5.45 3.6s2.456.7 2.708.7c.252 0 .94-.42.94-.84 0-.42 0-5.25-.94-6.678z"/>
@@ -30,17 +36,24 @@
                 </svg>
                 <span>WhatsApp</span>
             </a>
+            <a href="https://max.ru/u/f9LHodD0cOJ9fTtNUgMohFW4IB8tEknVdbsSuC5dIG5k-wgE_83lxL2MCw0" target="_blank" rel="noopener" class="developer-contact-link" title="MAX">
+                <svg class="developer-contact-icon developer-contact-icon-max" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <rect width="24" height="24" rx="6" fill="url(#max-icon-gradient)"/>
+                    <path d="M7.2 16.5V7.5h1.65l2.55 4.2 2.55-4.2H15.8v9H14.15v-5.1l-2.35 3.9h-1.05l-2.35-3.9v5.1H7.2z" fill="#fff"/>
+                    <defs>
+                        <linearGradient id="max-icon-gradient" x1="4" y1="4" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#5B4DFF"/>
+                            <stop offset="1" stop-color="#C93BFF"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span>MAX</span>
+            </a>
             <a href="mailto:admin@free-games.ru" class="developer-contact-link" title="Email">
                 <svg class="developer-contact-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
                 <span>Email</span>
-            </a>
-            <a href="https://vk.com/juriyizyumov" target="_blank" rel="noopener" class="developer-contact-link" title="ВКонтакте">
-                <svg class="developer-contact-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.785 16.241s.287-.033.434-.2c.135-.15.132-.433.132-.433s-.02-1.305.58-1.498c.592-.19 1.35.95 2.156 1.37.605.315 1.064.245 1.064.245l2.15-.03s1.125-.067.59-.96c-.044-.07-.31-.68-1.61-1.92-1.36-1.31-1.18-.55.46-1.68 1.01-.88 1.41-1.42 1.28-1.65-.12-.22-.86-.16-.86-.16l-2.22.014s-.164-.023-.285.05c-.12.07-.196.23-.196.23s-.35.94-.81 1.74c-.98 1.64-1.37 1.73-1.53 1.63-.37-.2-.28-.8-.28-1.23 0-1.34.21-1.9-.41-2.04-.21-.05-.37-.08-.91-.09-.7-.01-1.29 0-1.62.17-.22.11-.39.36-.29.37.13.02.42.08.57.29.2.27.19.87.19.87s.11 1.63-.26 1.83c-.26.13-.61-.14-1.37-1.63-.39-.75-.68-1.58-.68-1.58s-.06-.15-.16-.23c-.12-.09-.29-.06-.29-.06l-2.11.027s-.32.01-.44.15c-.1.12-.01.37-.01.37s1.68 3.95 3.57 5.94c1.74 1.8 3.72 1.68 3.72 1.68h.88z"/>
-                </svg>
-                <span>ВКонтакте</span>
             </a>
             </div>
         </div>
@@ -176,6 +189,10 @@
 
 .developer-contact-link:hover .developer-contact-icon {
     color: #2563eb;
+}
+
+.developer-contact-icon-max {
+    color: transparent;
 }
 
 /* Адаптивность для мобильных устройств */
